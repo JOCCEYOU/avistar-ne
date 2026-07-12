@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avistar NE - Acceso</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <link rel="icon" type="image/x-icon" href="./img-frontend/icono.ico">
+    <style>
+        /* Estilos específicos de login.html para mejorar la legibilidad y estética */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .auth-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100vw;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-spacer {
+            flex: 0 0 50% !important;
+            width: 50% !important;
+            max-width: 50% !important;
+            position: relative;
+        }
+        
+        .auth-sidebar {
+            flex: 0 0 50% !important;
+            width: 50% !important;
+            max-width: 50% !important;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        .auth-card-container {
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white !important; /* Letras blancas para etiquetas */
+        }
+
+        /* Password container style for icon positioning */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.75rem !important;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+            z-index: 5;
+        }
+
+        .password-toggle-btn:hover {
+            color: white;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color, #10b981);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-checkbox input {
+            width: auto;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .form-checkbox label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: white;
+        }
+
+        /* Toggle forms transition */
+        .auth-form-panel {
+            display: none;
+        }
+
+        .auth-form-panel.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-back-home {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+            z-index: 50;
+        }
+
+        .btn-back-home:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-3px);
+        }
+
+        /* location tag overlay */
+        .slideshow-location {
+            position: absolute;
+            bottom: 4.5rem;
+            left: 2rem;
+            z-index: 15;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .bg-slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slideshow-controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 15;
+            display: flex;
+            gap: 10px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .auth-spacer {
+                display: none !important;
+            }
+
+            .auth-sidebar {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 2rem 1.5rem;
+            }
+
+            .bg-slideshow {
+                display: none;
+            }
+
+            .slideshow-controls {
+                display: none;
+            }
+
+            .slideshow-location {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toastNotification" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 100; padding: 12px 20px; background: rgba(15, 23, 42, 0.95); border: 1px solid #10b981; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: white; font-size: 0.9rem; align-items: center; gap: 8px; animation: slideIn 0.3s ease-out;">
+        <span style="font-size:1.1rem;">🔔</span>
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <div class="auth-layout">
+        <!-- Slideshow background on left (takes 50% width) -->
+        <div class="bg-slideshow">
+            <div class="bg-slide active" style="background-image: url('./img-frontend/lg1.jpg')"></div>
+            <div class="bg-slide" style="background-image: url('./img-frontend/lg2.webp')"></div>
+            <div class="bg-slide" style="background-image: url('./img-frontend/lg3.jpg')"></div>
+            <div class="bg-slide" style="background-image: url('./img-frontend/lg4.jpg')"></div>
+            <div class="bg-slide" style="background-image: url('./img-frontend/lg5.webp')"></div>
+            <div class="bg-slide" style="background-image: url('./img-frontend/lg6.webp')"></div>
+        </div>
+
+        <!-- Location tag overlay -->
+        <div class="slideshow-location" id="slideshowLocation">
+            <span>📍</span> <span id="locationName">Laguna de La Restinga</span>
+        </div>
+
+        <!-- Controls for Slideshow -->
+        <div class="slideshow-controls">
+            <span class="slide-dot active" onclick="setSlide(0)"></span>
+            <span class="slide-dot" onclick="setSlide(1)"></span>
+            <span class="slide-dot" onclick="setSlide(2)"></span>
+            <span class="slide-dot" onclick="setSlide(3)"></span>
+            <span class="slide-dot" onclick="setSlide(4)"></span>
+            <span class="slide-dot" onclick="setSlide(5)"></span>
+        </div>
+
+        <div class="auth-content">
+            <!-- Left side empty to let slideshow show through -->
+            <div class="auth-spacer"></div>
+
+            <!-- Right side Sidebar -->
+            <div class="auth-sidebar">
+                <a href="./" class="btn-back-home">
+                    <span>←</span> Volver al inicio
+                </a>
+
+                <div class="auth-card-container">
+                    <div class="auth-header">
+                        <img src="./img-frontend/Captura_de_pantalla_2026-06-08_170731-removebg-preview.png" alt="Logo Avistar NE" style="width: 80px; height: 80px; object-fit: contain;">
+                        <h1 class="auth-title"><span style="font-weight: 800;">Avistar</span> <span style="font-weight: 500; color: #10b981;">NE</span></h1>
+                    </div>
+
+                    <!-- Panel Login -->
+                    <div id="loginPanel" class="auth-form-panel active">
+                        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; color: white;">Iniciar Sesión</h2>
+                        <div id="loginError" style="display: none; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: 8px; color: #fca5a5; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;"></div>
+                        
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label style="color: white !important;">Correo</label>
+                                <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: white !important;">Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+                                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <div class="form-checkbox" style="margin-bottom: 0;">
+                                    <input type="checkbox" id="loginRememberMe">
+                                    <label for="loginRememberMe" style="margin: 0;">Recordarme</label>
+                                </div>
+                                <a href="javascript:void(0)" onclick="showPanel('forgot')" style="color: #10b981; font-size: 0.85rem; font-weight: 500; text-decoration: none;">¿Olvidaste tu contraseña?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" style="padding: 0.8rem; font-size: 1.05rem;">Iniciar Sesión</button>
+                        </form>
+
+                        <!-- Social Login Divider -->
+                        <div style="position: relative; text-align: center; margin: 1.5rem 0;">
+                            <span style="background: #0f172a; padding: 0 10px; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index: 2;">O continuar con</span>
+                            <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.1); z-index: 1;"></div>
+                        </div>
+
+                        <!-- Social Buttons -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+                            <button type="button" class="btn btn-outline w-100" style="padding: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;" onclick="showSocialToast('Google')">
+                                <svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.6h3.3c1.93,-1.78 3.04,-4.4 3.04,-7.4C21.7,11.83 21.58,11.43 21.35,11.1z"/><path fill="#34A853" d="M12,21c2.43,0 4.47,-0.8 5.96,-2.2l-3.3,-2.6c-0.98,0.6 -2.18,1 -3.66,1c-2.82,0 -5.2,-1.9 -6.05,-4.47H1.57v2.6C3.06,18.41 7.24,21 12,21z"/><path fill="#FBBC05" d="M5.95,12.73c-0.22,-0.6 -0.35,-1.3 -0.35,-2c0,-0.7 0.13,-1.4 0.35,-2V5.13H1.57C0.57,7.13 0,9.36 0,11.73c0,2.37 0.57,4.6 1.57,6.6L5.95,12.73z"/><path fill="#EA4335" d="M12,5.38c1.32,0 2.5,0.45 3.44,1.35l2.58,-2.6C16.46,2.6 14.43,2 12,2C7.24,2 3.06,4.59 1.57,7.73l4.38,3.4C6.8,8.56 9.18,5.38 12,5.38z"/></svg>
+                                Google
+                            </button>
+                            <button type="button" class="btn btn-outline w-100" style="padding: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;" onclick="showSocialToast('Apple')">
+                                <svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path fill="currentColor" d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.1,16.67C20.08,16.74 19.67,18.11 18.71,19.5M15.97,4.17C16.63,3.37 17.07,2.28 16.95,1C16,1.04 14.9,1.6 14.24,2.38C13.68,3.04 13.19,4.14 13.34,5.39C14.39,5.47 15.4,4.88 15.97,4.17Z"/></svg>
+                                Apple
+                            </button>
+                        </div>
+
+                        <p style="text-align: center; font-size: 0.9rem; color: #94a3b8;">
+                            ¿No tienes cuenta? <a href="javascript:void(0)" onclick="showPanel('register')" style="color: #10b981; font-weight: 600; text-decoration: none;">Regístrate</a>
+                        </p>
+                    </div>
+
+                    <!-- Panel Registro -->
+                    <div id="registerPanel" class="auth-form-panel">
+                        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; color: white;">Crear Cuenta</h2>
+                        <div id="registerError" style="display: none; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: 8px; color: #fca5a5; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;"></div>
+                        
+                        <form id="registerForm">
+                            <div class="form-group">
+                                <label style="color: white !important;">Nombre completo</label>
+                                <input type="text" id="registerName" placeholder="Juan Pérez" required>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: white !important;">Correo</label>
+                                <input type="email" id="registerEmail" placeholder="tu@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: white !important;">Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('registerPassword')">👁️</button>
+                                </div>
+                                
+                                <!-- Password Strength Meter -->
+                                <div class="password-strength-container" style="margin-top: 0.6rem; display: none;">
+                                    <div style="display: flex; gap: 4px; height: 4px; margin-bottom: 4px;">
+                                        <div id="bar1" style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px; transition: background 0.3s;"></div>
+                                        <div id="bar2" style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px; transition: background 0.3s;"></div>
+                                        <div id="bar3" style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 2px; transition: background 0.3s;"></div>
+                                    </div>
+                                    <span id="strengthText" style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Fuerza de la contraseña</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: white !important;">Confirmar contraseña</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="registerConfirmPassword" placeholder="Repite la contraseña" required minlength="6">
+                                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('registerConfirmPassword')">👁️</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" style="padding: 0.8rem; font-size: 1.05rem; margin-top: 0.5rem;">Registrarse</button>
+                        </form>
+                        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #94a3b8;">
+                            ¿Ya tienes cuenta? <a href="javascript:void(0)" onclick="showPanel('login')" style="color: #10b981; font-weight: 600; text-decoration: none;">Inicia sesión</a>
+                        </p>
+                    </div>
+
+                    <!-- Panel Recuperar Contraseña -->
+                    <div id="forgotPanel" class="auth-form-panel">
+                        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; text-align: center; color: white;">Recuperar Contraseña</h2>
+                        <p style="color: #94a3b8; font-size: 0.875rem; text-align: center; margin-bottom: 1.5rem; line-height: 1.5;">
+                            Introduce tu dirección de correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.
+                        </p>
+                        <div id="forgotError" style="display: none; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: 8px; color: #fca5a5; font-size: 0.85rem; margin-bottom: 1rem; text-align: center;"></div>
+                        <div id="forgotSuccess" style="display: none; padding: 15px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 8px; color: #a7f3d0; font-size: 0.9rem; margin-bottom: 1.5rem; text-align: center; line-height: 1.5;"></div>
+                        
+                        <form id="forgotForm">
+                            <div class="form-group">
+                                <label style="color: white !important;">Correo</label>
+                                <input type="email" id="forgotEmail" placeholder="tu@email.com" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" style="padding: 0.8rem; font-size: 1.05rem; margin-top: 0.5rem;">Enviar instrucciones</button>
+                        </form>
+                        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #94a3b8;">
+                            <a href="javascript:void(0)" onclick="showPanel('login')" style="color: #10b981; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>←</span> Volver al inicio de sesión
+                            </a>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Slideshow Locations Array
+        const locations = [
+            "Laguna de La Restinga",
+            "Cerro El Copey",
+            "Península de Macanao",
+            "Salinas de Pampatar",
+            "Faro de Punta Ballena",
+            "Laguna de Las Marites"
+        ];
+
+        // Slideshow Logic
+        const slides = document.querySelectorAll('.bg-slide');
+        const dots = document.querySelectorAll('.slide-dot');
+        const locationNameEl = document.getElementById('locationName');
+        let currentSlide = 0;
+        let slideInterval;
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            if (locationNameEl && locations[index]) {
+                locationNameEl.textContent = locations[index];
+            }
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            let next = (currentSlide + 1) % slides.length;
+            showSlide(next);
+        }
+
+        function setSlide(index) {
+            clearInterval(slideInterval);
+            showSlide(index);
+            startSlideshow();
+        }
+
+        function startSlideshow() {
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        startSlideshow();
+
+        // Panel Switching
+        function showPanel(panelName) {
+            const loginPanel = document.getElementById('loginPanel');
+            const registerPanel = document.getElementById('registerPanel');
+            const forgotPanel = document.getElementById('forgotPanel');
+            
+            // Hide all first
+            loginPanel.classList.remove('active');
+            registerPanel.classList.remove('active');
+            forgotPanel.classList.remove('active');
+
+            if (panelName === 'register') {
+                registerPanel.classList.add('active');
+                history.replaceState(null, '', '?register=true');
+            } else if (panelName === 'forgot') {
+                forgotPanel.classList.add('active');
+                history.replaceState(null, '', '?forgot=true');
+            } else {
+                loginPanel.classList.add('active');
+                history.replaceState(null, '', 'login.html');
+            }
+        }
+
+        // Initialize panel based on query string
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('register') === 'true') {
+            showPanel('register');
+        } else if (urlParams.get('forgot') === 'true') {
+            showPanel('forgot');
+        }
+
+        // Password Visibility Toggle Function
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        // Password Strength Meter Listener
+        const regPass = document.getElementById('registerPassword');
+        const strengthContainer = document.querySelector('.password-strength-container');
+        const bar1 = document.getElementById('bar1');
+        const bar2 = document.getElementById('bar2');
+        const bar3 = document.getElementById('bar3');
+        const strengthText = document.getElementById('strengthText');
+
+        if (regPass) {
+            regPass.addEventListener('input', () => {
+                const val = regPass.value;
+                if (val.length === 0) {
+                    strengthContainer.style.display = 'none';
+                    return;
+                }
+                strengthContainer.style.display = 'block';
+                
+                let score = 0;
+                if (val.length >= 6) score++;
+                if (val.length >= 10) score++;
+                if (/[A-Z]/.test(val)) score++;
+                if (/[0-9]/.test(val)) score++;
+                if (/[^A-Za-z0-9]/.test(val)) score++;
+                
+                // Reset bars
+                bar1.style.background = 'rgba(255,255,255,0.1)';
+                bar2.style.background = 'rgba(255,255,255,0.1)';
+                bar3.style.background = 'rgba(255,255,255,0.1)';
+                
+                if (score <= 2) {
+                    bar1.style.background = '#ef4444'; // Red
+                    strengthText.textContent = 'Contraseña débil';
+                    strengthText.style.color = '#fca5a5';
+                } else if (score <= 4) {
+                    bar1.style.background = '#f59e0b'; // Orange
+                    bar2.style.background = '#f59e0b';
+                    strengthText.textContent = 'Contraseña media';
+                    strengthText.style.color = '#fde047';
+                } else {
+                    bar1.style.background = '#10b981'; // Green
+                    bar2.style.background = '#10b981';
+                    bar3.style.background = '#10b981';
+                    strengthText.textContent = 'Contraseña fuerte';
+                    strengthText.style.color = '#a7f3d0';
+                }
+            });
+        }
+
+        // Custom Toast Notification System
+        function showSocialToast(provider) {
+            const toast = document.getElementById('toastNotification');
+            const msg = document.getElementById('toastMessage');
+            msg.innerHTML = 'El acceso con <strong>' + provider + '</strong> estará disponible en la próxima actualización.';
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.opacity = '1';
+                }, 500);
+            }, 3500);
+        }
+
+        // API URL Configuration
+        const API_URL = 'http://localhost:5000/api';
+
+        // Login Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('loginRememberMe').checked;
+            const errorDiv = document.getElementById('loginError');
+
+            errorDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Credenciales incorrectas');
+                }
+
+                const token = data.token || data.data?.token;
+                const user = data.user || data.data?.user;
+
+                // Save session
+                sessionStorage.setItem('authToken', token);
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+                if (rememberMe) {
+                    localStorage.setItem('authToken', token);
+                    localStorage.setItem('user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                }
+
+                // Redirect to homepage
+                window.location.href = './';
+
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Register Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const errorDiv = document.getElementById('registerError');
+
+            errorDiv.style.display = 'none';
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Las contraseñas no coinciden';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error al crear la cuenta');
+                }
+
+                const token = data.token || data.data?.token;
+                const user = data.user || data.data?.user;
+
+                // Save session
+                sessionStorage.setItem('authToken', token);
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+                // Redirect to homepage
+                window.location.href = './';
+
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Forgot Password Handler (Simulated)
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.trim();
+            const errorDiv = document.getElementById('forgotError');
+            const successDiv = document.getElementById('forgotSuccess');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enviando...';
+                
+                // Simulate network latency
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar instrucciones';
+                
+                successDiv.innerHTML = '¡Enlace enviado! Hemos enviado un correo a <strong>' + email + '</strong> con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.';
+                successDiv.style.display = 'block';
+                e.target.reset();
+            } catch (err) {
+                errorDiv.textContent = 'Ocurrió un error. Inténtalo de nuevo.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

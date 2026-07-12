@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avistar NE | Registro de Aves en Margarita</title>
+    <meta name="description"
+        content="Sistema interactivo para el registro y visualización de aves en la Isla de Margarita, Nueva Esparta.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Leaflet Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+    <!-- Flatpickr CSS para el Almanaque -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./assets/css/styles.css?v=1.0.3">
+</head>
+
+<body>
+
+    <nav class="navbar glass-effect" id="main-nav">
+        <div class="nav-logo">
+            <a href="#/"
+                style="display: flex; align-items: center; gap: 0.8rem; color: inherit; text-decoration: none; transition: opacity 0.2s;"
+                onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <img src="./img-frontend/Captura_de_pantalla_2026-06-08_170731-removebg-preview.png"
+                    alt="Logo Avistar NE" style="height: 2.8rem; width: auto; object-fit: contain;">
+                <h1 style="margin: 0; font-size: 1.5rem; line-height: 1;" class="nav-title-text"><span
+                        class="title-avistar">Avistar</span> <span class="title-ne">NE</span></h1>
+            </a>
+        </div>
+
+        <div class="nav-links" style="display:flex; gap:0.6rem; align-items:center;">
+            <a href="#/" id="nav-home-link" style="font-weight: 500; color: var(--text-main);">Inicio</a>
+            <a href="#/actividad" style="font-weight: 500; color: var(--text-main);">Avistamientos</a>
+            <a href="#/dashboard" style="font-weight: 500; color: var(--text-main);">Mapa Interactivo</a>
+            <a href="#/especies" style="font-weight: 500; color: var(--text-main);">Bitácora</a>
+            <a href="#/estadisticas" style="font-weight: 500; color: var(--text-main);">Estadísticas</a>
+            <a href="#/reportar"
+                onclick="if(!window.authManager || !window.authManager.isAuthenticated){ event.preventDefault(); window.modalManager.openLogin(); }"
+                style="font-weight: 500; color: var(--text-main);">Reportar Avistamiento</a>
+        </div>
+
+        <div class="auth-buttons" id="authButtons" style="display: none; gap: 0.5rem; align-items: center;">
+            <button onclick="window.toggleTheme()" class="btn btn-outline" title="Cambiar Tema"
+                style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; cursor: pointer; border-radius: 50%;">
+                <span class="theme-icon-el" style="font-size: 1.2rem;">☀️</span>
+            </button>
+            <a href="login.html" class="btn btn-outline" style="text-decoration:none;">Iniciar Sesión</a>
+            <a href="login.html?register=true" class="btn btn-primary" style="text-decoration:none;">Registrarse</a>
+        </div>
+
+        <div class="user-menu" id="userMenu"
+            style="display: none; position: relative; align-items: center; gap: 0.8rem;">
+            <a href="#/admin" id="adminLink"
+                style="display: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); width: 40px; height: 40px; text-decoration: none; align-items: center; justify-content: center; transition: background 0.2s;" title="Panel Admin">
+                <span style="font-size: 1.2rem;">⚙️</span>
+            </a>
+
+            <!-- Botón / Campana de Notificaciones -->
+            <div id="notificationsTrigger"
+                style="position: relative; cursor: pointer; padding: 0.5rem; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; transition: background 0.2s;">
+                <span style="font-size: 1.2rem;">🔔</span>
+                <span id="notificationBadge"
+                    style="display: none; position: absolute; top: -3px; right: -3px; background: #ef4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: bold; align-items: center; justify-content: center; border: 2px solid #0f172a;">0</span>
+            </div>
+
+            <!-- Menú Desplegable de Notificaciones -->
+            <div id="notificationsDropdown" class="glass-effect nav-dropdown-menu"
+                style="display: none; right: 80px; width: 320px; padding: 1rem; flex-direction: column;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.8rem; border-bottom: 1px solid rgba(150,150,150,0.2); margin-bottom: 0.8rem;">
+                    <div style="font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>🔔</span> Notificaciones
+                    </div>
+                    <span id="clearNotificationsBtn"
+                        style="font-size: 0.75rem; color: #10b981; cursor: pointer; font-weight: 600;">Marcar como
+                        leídas</span>
+                </div>
+                <div id="notificationsList"
+                    style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
+                    <div style="text-align: center; opacity: 0.7; padding: 1rem; font-size: 0.85rem;">No tienes
+                        notificaciones por el momento.</div>
+                </div>
+            </div>
+
+            <!-- User Dropdown Trigger -->
+            <div id="userDropdownTrigger" class="navbar-user-trigger user-role-normal" style="padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important;">
+                <div style="display: none;">
+                    <div id="userNameDisplay">Usuario</div>
+                    <div id="userRoleDisplay">Avistador 🌿</div>
+                </div>
+                <div id="userAvatarCircle"
+                    style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s; cursor: pointer;"
+                    onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    👤
+                </div>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <div id="userDropdownMenu" class="glass-effect nav-dropdown-menu"
+                style="display: none; right: 0; width: 260px; padding: 1rem 0; flex-direction: column;">
+                <div
+                    style="padding: 0 1.2rem 1rem 1.2rem; border-bottom: 1px solid rgba(150,150,150,0.2); margin-bottom: 0.5rem;">
+                    <div
+                        style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 0.3rem; opacity: 0.7;">
+                        USUARIO CONECTADO</div>
+                    <div id="dropdownUserName" style="font-weight: 700; font-size: 1rem; text-transform: uppercase;">
+                        USUARIO</div>
+                    <div id="dropdownUserEmail" style="font-size: 0.85rem; word-break: break-all; opacity: 0.85;">
+                        correo@ejemplo.com</div>
+                </div>
+
+                <a href="#/reportar" class="dropdown-item"
+                    style="padding: 0.7rem 1.2rem; color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;">
+                    <span style="color: var(--primary-color);">+</span> Reportar Avistamiento
+                </a>
+                <a href="#/perfil" class="dropdown-item"
+                    style="padding: 0.7rem 1.2rem; color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;">
+                    <span style="color: var(--primary-color);">👤</span> Mi Perfil
+                </a>
+
+                <a href="#" class="dropdown-item"
+                    style="padding: 0.7rem 1.2rem; color: #e2e8f0; text-decoration: none; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;"
+                    onclick="event.preventDefault(); window.toggleTheme();">
+                    <span id="themeToggleIcon" class="theme-icon-el">☀️</span> Cambiar Tema
+                </a>
+
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+
+                <a href="#" id="btnLogout" class="dropdown-item"
+                    style="padding: 0.7rem 1.2rem; color: #ef4444; text-decoration: none; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+
+        <!-- Hamburger Button (Mobile only) -->
+        <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Abrir menú" onclick="window.toggleMobileMenu()">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Drawer Overlay -->
+    <div id="mobileMenuOverlay" class="mobile-overlay" onclick="window.closeMobileMenu()"></div>
+
+    <!-- Mobile Drawer Menu -->
+    <div id="mobileDrawer" class="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div style="display:flex; align-items:center; gap:0.7rem;">
+                <img src="./img-frontend/Captura_de_pantalla_2026-06-08_170731-removebg-preview.png" alt="Logo"
+                    style="height:2.2rem; width:auto;">
+                <span class="nav-title-text" style="font-size:1.3rem; font-weight:800;"><span
+                        class="title-avistar">Avistar</span> <span class="title-ne">NE</span></span>
+            </div>
+            <button class="mobile-drawer-close" onclick="window.closeMobileMenu()" aria-label="Cerrar menú">✕</button>
+        </div>
+
+        <nav class="mobile-drawer-nav">
+            <a href="#/" class="mobile-drawer-link" onclick="window.closeMobileMenu()">🏠 Inicio</a>
+            <a href="#/actividad" class="mobile-drawer-link" onclick="window.closeMobileMenu()">🔭 Avistamientos</a>
+            <a href="#/dashboard" class="mobile-drawer-link" onclick="window.closeMobileMenu()">🗺️ Mapa Interactivo</a>
+            <a href="#/especies" class="mobile-drawer-link" onclick="window.closeMobileMenu()">📖 Bitácora</a>
+            <a href="#/estadisticas" class="mobile-drawer-link" onclick="window.closeMobileMenu()">📊 Estadísticas</a>
+        </nav>
+
+        <div class="mobile-drawer-divider"></div>
+
+        <!-- Theme toggle in drawer -->
+        <div class="mobile-drawer-theme-row">
+            <span class="theme-icon-el" style="font-size:1.2rem;">🌙</span>
+            <span style="font-weight:600; font-size:0.95rem;">Modo Oscuro</span>
+            <button class="mobile-theme-toggle-btn"
+                onclick="window.toggleTheme(); window.closeMobileMenu();">CAMBIAR</button>
+        </div>
+
+        <div class="mobile-drawer-divider"></div>
+
+        <!-- Auth section (guest) -->
+        <div class="mobile-drawer-auth" id="mobileAuthGuest">
+            <a href="login.html" class="mobile-drawer-auth-link" onclick="window.closeMobileMenu()">
+                <span>🔑</span> Iniciar Sesión
+            </a>
+            <a href="login.html?register=true" class="btn btn-primary mobile-drawer-btn"
+                onclick="window.closeMobileMenu()">
+                🐦 Unirse a Avistar NE
+            </a>
+        </div>
+
+        <!-- Auth section (logged in) -->
+        <div class="mobile-drawer-auth" id="mobileAuthUser" style="display:none;">
+            <div class="mobile-drawer-user-info">
+                <div id="mobileUserName" style="font-weight:700; font-size:1rem;">Usuario</div>
+                <div id="mobileUserRole" style="font-size:0.82rem; opacity:0.7;">Avistador 🌿</div>
+            </div>
+            <a href="#/admin" id="mobileAdminLink" class="mobile-drawer-link"
+                style="display: none; color: var(--primary-light) !important; font-weight: 700; border-left: 3px solid var(--primary-light); padding-left: 0.5rem;"
+                onclick="window.closeMobileMenu()">⚙️ Panel Admin</a>
+            <!-- Notificaciones en Móvil -->
+            <div class="mobile-notifications-container" style="width: 100%; display: flex; flex-direction: column;">
+                <a href="#" id="mobileNotificationsLink" class="mobile-drawer-link" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span>🔔 Notificaciones</span>
+                    <span id="mobileNotificationBadge" style="display: none; background: #ef4444; color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.7rem; font-weight: bold; align-items: center; justify-content: center; line-height: 18px; text-align: center; padding: 0 4px;">0</span>
+                </a>
+                <div id="mobileNotificationsDropdown" class="glass-effect" style="display: none; width: 100%; padding: 0.8rem; flex-direction: column; gap: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; margin-top: 0.3rem; max-height: 250px; overflow-y: auto; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; border-bottom: 1px solid rgba(150,150,150,0.2); padding-bottom: 0.4rem;">
+                        <span id="mobileClearNotificationsBtn" style="font-size: 0.75rem; color: #10b981; cursor: pointer; font-weight: 600;">Marcar como leídas</span>
+                    </div>
+                    <div id="mobileNotificationsList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div style="text-align: center; opacity: 0.7; padding: 1rem; font-size: 0.85rem;">No tienes notificaciones por el momento.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#/perfil" class="mobile-drawer-link" onclick="window.closeMobileMenu()">👤 Mi Perfil</a>
+            <a href="#/reportar" class="btn btn-primary mobile-drawer-btn"
+                onclick="window.closeMobileMenu(); if(!window.authManager || !window.authManager.isAuthenticated){ window.modalManager.openLogin(); }">
+                + Reportar Avistamiento
+            </a>
+            <a href="#" id="mobileBtnLogout" class="mobile-drawer-link mobile-drawer-logout"
+                onclick="window.closeMobileMenu()">
+                🚪 Cerrar Sesión
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Vista: Landing -->
+    <main id="landing-view" class="view-section" style="position: relative; overflow: hidden;">
+        <style>
+            @keyframes floatSlow {
+                0% {
+                    transform: translateY(0px) rotate(var(--rot));
+                }
+
+                50% {
+                    transform: translateY(-15px) rotate(var(--rot));
+                }
+
+                100% {
+                    transform: translateY(0px) rotate(var(--rot));
+                }
+            }
+
+            .floating-dec {
+                position: absolute;
+                border-radius: 16px;
+                object-fit: cover;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                animation: floatSlow 6s ease-in-out infinite;
+                z-index: 15;
+                pointer-events: auto;
+            }
+
+            .hero-content {
+                position: relative;
+                z-index: 10;
+            }
+
+            @media (max-width: 900px) {
+                .floating-dec {
+                    display: none;
+                }
+            }
+        </style>
+
+        <!-- Contenedor para decoraciones flotantes dinámicas -->
+        <div id="floating-decorations-container" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 0; overflow: visible;"></div>
+
+        <div class="hero hero-content" style="text-align: center; position: relative; z-index: 10;">
+            <img src="./img-frontend/Captura_de_pantalla_2026-06-08_170731-removebg-preview.png"
+                alt="Logo Avistar NE Grande"
+                style="width: 220px; height: 220px; object-fit: contain; margin-bottom: 1.5rem; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4));">
+            <h2>Descubre y Protege las<br>Aves de Nueva Esparta</h2>
+            <p style="margin: 0 auto 2rem auto; max-width: 600px;">Únete a la comunidad de observadores de aves.
+                Registra tus avistamientos, explora el mapa interactivo y contribuye a la conservación de la
+                biodiversidad en Nueva Esparta.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="#/dashboard" class="btn btn-primary" style="text-decoration:none;">Explorar Mapa</a>
+                <a href="login.html?register=true" class="btn btn-outline" style="text-decoration:none;">Únete Ahora</a>
+            </div>
+        </div>
+
+        <!-- Santuarios Naturales de la Isla -->
+        <section class="sanctuaries-section" style="padding: 4rem 2rem; position: relative; z-index: 10;">
+            <div class="gallery-container">
+                <h2 class="text-center mb-1 section-title"
+                    style="font-size: 2.3rem; font-weight: 700; letter-spacing: -0.02em;">Santuarios Naturales de la
+                    Isla</h2>
+                <p class="text-center text-muted mb-4 section-desc"
+                    style="max-width: 680px; margin-left: auto; margin-right: auto; font-size: 1.05rem; line-height: 1.5;">
+                    Explora los ecosistemas clave donde nuestro sistema registra la mayor actividad ecológica y
+                    avistamiento de aves migratorias.
+                </p>
+
+                <div class="sanctuaries-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto;">
+
+                    <!-- Tarjeta 1: Laguna de La Restinga -->
+                    <div class="sanctuary-card"
+                        onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('restinga');"
+                        style="cursor: pointer;">
+                        <img src="./img-frontend/sanctuary-restinga.png" alt="Laguna de La Restinga"
+                            class="sanctuary-card-bg">
+                        <div class="sanctuary-card-overlay"></div>
+                        <div class="sanctuary-card-content">
+                            <h3 class="sanctuary-card-title">Laguna de La Restinga</h3>
+                            <p class="sanctuary-card-desc">Un laberinto de manglares vital para flamencos, garzas y
+                                espectaculares aves de paso migratorio.</p>
+                            <div class="sanctuary-card-badge">
+                                <span>📍</span> Parque Nacional / Manglares
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2: Cerro El Copey -->
+                    <div class="sanctuary-card"
+                        onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('copey');"
+                        style="cursor: pointer;">
+                        <img src="./img-frontend/sanctuary-copey.png" alt="Cerro El Copey" class="sanctuary-card-bg">
+                        <div class="sanctuary-card-overlay"></div>
+                        <div class="sanctuary-card-content">
+                            <h3 class="sanctuary-card-title">Cerro El Copey</h3>
+                            <p class="sanctuary-card-desc">Santuario de selva nublada en el centro de la isla. Punto
+                                preferido para registrar especies endémicas y rapaces.</p>
+                            <div class="sanctuary-card-badge">
+                                <span>📍</span> Sierra Central / Selva Nublada
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 3: Península de Macanao -->
+                    <div class="sanctuary-card"
+                        onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('macanao');"
+                        style="cursor: pointer;">
+                        <img src="./img-frontend/sanctuary-macanao.png" alt="Península de Macanao"
+                            class="sanctuary-card-bg">
+                        <div class="sanctuary-card-overlay"></div>
+                        <div class="sanctuary-card-content">
+                            <h3 class="sanctuary-card-title">Península de Macanao</h3>
+                            <p class="sanctuary-card-desc">Ecosistema xerófilo árido único donde habita y se recupera la
+                                amenazada Cotorra Margariteña.</p>
+                            <div class="sanctuary-card-badge">
+                                <span>📍</span> Península Occidental
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Galería de Aves (Features Section) -->
+        <section class="bird-gallery-section" style="position: relative; z-index: 10;">
+            <div class="gallery-container">
+                <h2 class="text-center mb-1">Aves de Margarita</h2>
+                <p class="text-center text-muted mb-4">Conoce algunas de las especies emblemáticas de nuestra región.
+                </p>
+
+                <div class="bird-carousels-container"
+                    style="display: flex; flex-direction: column; gap: 1.5rem; overflow: hidden; width: calc(100% + 8%); margin-left: -4%;">
+
+                    <!-- Carrusel 1 -->
+                    <div class="bird-carousel-viewport" style="overflow: hidden; width: 100%;">
+                        <div class="bird-carousel-track" id="bird-gallery-track-1" style="display: flex; gap: 1rem;">
+                            <!-- Las tarjetas de aves se generarán aquí con JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Carrusel 2 -->
+                    <div class="bird-carousel-viewport" style="overflow: hidden; width: 100%;">
+                        <div class="bird-carousel-track" id="bird-gallery-track-2" style="display: flex; gap: 1rem;">
+                            <!-- Las tarjetas de aves se generarán aquí con JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Carrusel 3 -->
+                    <div class="bird-carousel-viewport" style="overflow: hidden; width: 100%;">
+                        <div class="bird-carousel-track" id="bird-gallery-track-3" style="display: flex; gap: 1rem;">
+                            <!-- Las tarjetas de aves se generarán aquí con JavaScript -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Mapa Interactivo (Usuarios) -->
+        <section class="bird-gallery-section" style="padding-top: 4rem; padding-bottom: 4rem; background: transparent; position: relative; z-index: 10;">
+            <!-- Seccion Trivia (Minijuego Educativo) -->
+            <div class="trivia-section" style="margin-top: 2rem; text-align: center;">
+                <div
+                    style="display: inline-block; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 30px; padding: 0.4rem 1.4rem; color: #10b981; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem;">
+                    🎓 PON A PRUEBA TU CONOCIMIENTO INSULAR
+                </div>
+                <h2 class="section-title"
+                    style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.8rem; letter-spacing: -0.02em;">
+                    ¿Conoces las Aves de Margarita?
+                </h2>
+                <p class="section-desc"
+                    style="max-width: 680px; margin: 0 auto 2.5rem auto; font-size: 1.05rem; line-height: 1.5;">
+                    Participa en nuestro minijuego educativo de conservación para desbloquear medallas virtuales dentro
+                    de la comunidad de Avistar NE.
+                </p>
+
+                <div class="glass-effect trivia-card-box"
+                    style="max-width: 850px; margin: 0 auto; padding: 2.5rem; border-radius: 20px; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(12px);"
+                    id="trivia-container">
+                    <!-- El contenido de la trivia se cargará dinámicamente con JS -->
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 4rem;">
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn btn-outline"
+                    style="border-radius: 50px; padding: 0.8rem 2rem; display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary-color); border-color: var(--primary-color); transition: all 0.3s; background: rgba(16, 185, 129, 0.1);"
+                    onmouseover="this.style.background='var(--primary-color)'; this.style.color='white';"
+                    onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.color='var(--primary-color)';">
+                    ↑ Volver al Inicio
+                </button>
+            </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Vista: Actividad Reciente / Avistamientos -->
+    <main id="actividad-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px; min-height: calc(100vh - 80px);">
+        <h2 class="text-center mb-1">Avistamientos Comunitarios</h2>
+        <p class="text-center text-muted mb-4">Fotos y reportes compartidos por la comunidad de Avistar NE.</p>
+
+        <!-- Mapa Interactivo de Avistamientos -->
+        <h3 class="mb-3 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">Mapa de
+            Avistamientos Recientes</h3>
+        <div class="map-container glass-effect p-3" style="max-width: 1200px; margin: 0 auto 3rem auto; height: 500px;">
+            <div id="landing-map" style="width: 100%; height: 100%; border-radius: 8px;"></div>
+        </div>
+
+        <!-- Carrusel de avistamientos (Estilo galería de especies) -->
+        <div class="bird-carousels-container" style="overflow: hidden; width: 100%; margin-bottom: 3rem;">
+            <div class="bird-carousel-viewport" style="overflow: hidden; width: 100%;">
+                <div class="bird-carousel-track" id="actividad-sightings-carousel" style="display: flex; gap: 1rem;">
+                    <!-- Las tarjetas de avistamientos se generarán aquí -->
+                    <div style="padding: 2rem; color: var(--text-muted); text-align: center; width: 100%;">Cargando
+                        avistamientos recientes...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feed / Lista completa -->
+        <h3 class="mb-3 border-bottom pb-2" style="border-color: rgba(255,255,255,0.1) !important;">Todos los
+            Avistamientos</h3>
+        <div id="activity-feed"></div>
+    </main>
+
+    <!-- Vista: Dashboard -->
+    <main id="dashboard-view" class="view-section" style="display: none;">
+        <div class="dashboard-grid">
+            <div class="map-container glass-effect p-3">
+                <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 0.5rem;">
+                    <h3>Mapa de Avistamientos</h3>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="if(window.resetMapToAllBirds) window.resetMapToAllBirds()"
+                            class="btn btn-outline"
+                            style="padding: 0.4rem 1rem; font-size: 0.9rem; border-color: #3b82f6; color: #3b82f6; cursor: pointer;">🔄
+                            Ver Todas</button>
+                        <button
+                            onclick="if(window.modalManager && window.nativeBirdsData) window.modalManager.openFloatingZonesOverlay(window.nativeBirdsData)"
+                            class="btn btn-outline"
+                            style="padding: 0.4rem 1rem; font-size: 0.9rem; border-color: #f59e0b; color: #f59e0b; cursor: pointer;">🗺️
+                            Ver Zonas</button>
+                        <a href="#/actividad" class="btn btn-outline"
+                            style="padding: 0.4rem 1rem; font-size: 0.9rem; border-color: #8b5cf6; color: #8b5cf6; text-decoration: none;">📸
+                            Avistamientos</a>
+                        <a href="#/especies" class="btn btn-outline"
+                            style="padding: 0.4rem 1rem; font-size: 0.9rem; text-decoration: none;">Bitácora</a>
+                        <a href="#/reportar" class="btn btn-primary"
+                            style="padding: 0.4rem 1rem; font-size: 0.9rem; text-decoration: none;">Reportar
+                            Avistamiento</a>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros del Mapa -->
+                <div id="mapFilterBar">
+                    <!-- Fila 1: Condición -->
+                    <div class="map-filter-row">
+                        <span class="filter-label">Condición:</span>
+                        <button class="filter-btn active" data-filter="category" data-value="Todas"
+                            onclick="window.filterMapBirds('category', 'Todas', this)">Todas</button>
+                        <button class="filter-btn btn-danger-filter" data-filter="category" data-value="En Peligro"
+                            onclick="window.filterMapBirds('category', 'En Peligro', this)">En Peligro</button>
+                        <button class="filter-btn btn-success-filter" data-filter="category" data-value="Comunes"
+                            onclick="window.filterMapBirds('category', 'Comunes', this)">Comunes</button>
+                        <button class="filter-btn btn-symbolic-filter" data-filter="category" data-value="Simbólicas"
+                            onclick="window.filterMapBirds('category', 'Simbólicas', this)">Simbólicas</button>
+                        <button class="filter-btn btn-protected-filter" data-filter="category" data-value="Protegidas"
+                            onclick="window.filterMapBirds('category', 'Protegidas', this)">Protegidas</button>
+                        <div class="filter-divider"></div>
+                        <span id="mapFilterCount"></span>
+                    </div>
+                    <!-- Fila 2: Hábitat -->
+                    <div class="map-filter-row">
+                        <span class="filter-label">Hábitat:</span>
+                        <button class="filter-btn active" data-filter="type" data-value="Todas"
+                            onclick="window.filterMapBirds('type', 'Todas', this)">Todas</button>
+                        <button class="filter-btn btn-coastal-filter" data-filter="type" data-value="Costeras"
+                            onclick="window.filterMapBirds('type', 'Costeras', this)">Costeras</button>
+                        <button class="filter-btn btn-mangrove-filter" data-filter="type" data-value="Manglares"
+                            onclick="window.filterMapBirds('type', 'Manglares', this)">Manglares</button>
+                        <button class="filter-btn btn-migratory-filter" data-filter="type" data-value="Migratoria"
+                            onclick="window.filterMapBirds('type', 'Migratoria', this)">Migratorias</button>
+                        <button class="filter-btn btn-interior-filter" data-filter="type" data-value="De Interior"
+                            onclick="window.filterMapBirds('type', 'De Interior', this)">De Interior</button>
+                    </div>
+                </div>
+
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Santuarios Naturales de la Isla (Dashboard) -->
+        <section class="sanctuaries-section"
+            style="padding: 4rem 1rem 2rem 1rem; position: relative; z-index: 10; max-width: 1200px; margin: 0 auto;">
+            <h2 class="text-center mb-1 section-title"
+                style="font-size: 2.3rem; font-weight: 700; letter-spacing: -0.02em;">Santuarios Naturales de la Isla
+            </h2>
+            <p class="text-center text-muted mb-4 section-desc"
+                style="max-width: 680px; margin-left: auto; margin-right: auto; font-size: 1.05rem; line-height: 1.5;">
+                Explora los ecosistemas clave donde nuestro sistema registra la mayor actividad ecológica y avistamiento
+                de aves migratorias.
+            </p>
+
+            <div class="sanctuaries-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 0 auto;">
+
+                <!-- Tarjeta 1: Laguna de La Restinga -->
+                <div class="sanctuary-card"
+                    onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('restinga');"
+                    style="cursor: pointer;">
+                    <img src="./img-frontend/sanctuary-restinga.png" alt="Laguna de La Restinga"
+                        class="sanctuary-card-bg">
+                    <div class="sanctuary-card-overlay"></div>
+                    <div class="sanctuary-card-content">
+                        <h3 class="sanctuary-card-title">Laguna de La Restinga</h3>
+                        <p class="sanctuary-card-desc">Un laberinto de manglares vital para flamencos, garzas y
+                            espectaculares aves de paso migratorio.</p>
+                        <div class="sanctuary-card-badge">
+                            <span>📍</span> Parque Nacional / Manglares
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Cerro El Copey -->
+                <div class="sanctuary-card"
+                    onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('copey');"
+                    style="cursor: pointer;">
+                    <img src="./img-frontend/sanctuary-copey.png" alt="Cerro El Copey" class="sanctuary-card-bg">
+                    <div class="sanctuary-card-overlay"></div>
+                    <div class="sanctuary-card-content">
+                        <h3 class="sanctuary-card-title">Cerro El Copey</h3>
+                        <p class="sanctuary-card-desc">Santuario de selva nublada en el centro de la isla. Punto
+                            preferido para registrar especies endémicas y rapaces.</p>
+                        <div class="sanctuary-card-badge">
+                            <span>📍</span> Sierra Central / Selva Nublada
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Península de Macanao -->
+                <div class="sanctuary-card"
+                    onclick="if(window.modalManager) window.modalManager.openSanctuaryDetails('macanao');"
+                    style="cursor: pointer;">
+                    <img src="./img-frontend/sanctuary-macanao.png" alt="Península de Macanao"
+                        class="sanctuary-card-bg">
+                    <div class="sanctuary-card-overlay"></div>
+                    <div class="sanctuary-card-content">
+                        <h3 class="sanctuary-card-title">Península de Macanao</h3>
+                        <p class="sanctuary-card-desc">Ecosistema xerófilo árido único donde habita y se recupera la
+                            amenazada Cotorra Margariteña.</p>
+                        <div class="sanctuary-card-badge">
+                            <span>📍</span> Península Occidental
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Seccion Trivia (Dashboard) -->
+        <div class="trivia-section"
+            style="padding: 3rem 1rem 5rem 1rem; text-align: center; max-width: 1200px; margin: 0 auto;">
+            <div
+                style="display: inline-block; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 30px; padding: 0.4rem 1.4rem; color: #10b981; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem;">
+                🎓 PON A PRUEBA TU CONOCIMIENTO INSULAR
+            </div>
+            <h2 class="section-title"
+                style="font-size: 2.4rem; font-weight: 800; margin-bottom: 0.8rem; letter-spacing: -0.02em;">
+                ¿Conoces las Aves de Margarita?
+            </h2>
+            <p class="section-desc"
+                style="max-width: 680px; margin: 0 auto 2.5rem auto; font-size: 1.05rem; line-height: 1.5;">
+                Participa en nuestro minijuego educativo de conservación para desbloquear medallas virtuales dentro de
+                la comunidad de Avistar NE.
+            </p>
+
+            <div class="glass-effect trivia-box-target trivia-card-box"
+                style="max-width: 850px; margin: 0 auto; padding: 2.5rem; border-radius: 20px; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.5); backdrop-filter: blur(12px);"
+                id="dashboard-trivia-container">
+                <!-- Se cargará dinámicamente -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista: Estadísticas -->
+    <main id="stats-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px;">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <h2 style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 1rem;">Estadísticas de
+                Biodiversidad</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Explora los datos
+                recopilados por la comunidad sobre las aves nativas de Nueva Esparta.</p>
+        </div>
+        <div id="stats-container"></div>
+    </main>
+
+    <!-- Vista: Directorio de Usuarios (Admin) -->
+    <main id="admin-users-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1000px; margin: 0 auto; margin-top: 80px;">
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color: var(--primary-color); font-size: 2.5rem; margin: 0;">Directorio de Usuarios</h2>
+            <a href="#/dashboard" class="btn btn-outline" style="text-decoration: none;">Volver al Dashboard</a>
+        </div>
+        <div class="glass-effect" style="padding: 2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.7);">
+            <div id="admin-users-container"></div>
+        </div>
+    </main>
+
+    <!-- Vista: Todos los Avistamientos (Admin) -->
+    <main id="admin-all-sightings-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px;">
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color: var(--primary-color); font-size: 2.5rem; margin: 0;">Gestión de Avistamientos</h2>
+            <a href="#/dashboard" class="btn btn-outline" style="text-decoration: none;">Volver al Dashboard</a>
+        </div>
+        <div class="glass-effect" style="padding: 2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.7);">
+            <div id="admin-all-sightings-container"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem; grid-column: 1 / -1;">
+                    Cargando todos los avistamientos...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista: Bitácora de Especies -->
+    <main id="species-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px;">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <h2 style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 1rem;">Bitácora de Especies</h2>
+            <p
+                style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; margin-bottom: 1.5rem;">
+                Explora la fauna endémica de la región. Filtra por nombre, hábitat o condición.</p>
+
+            <!-- Barra de Búsqueda y Alternador de Vista -->
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="species-search-input" placeholder="🔍 Buscar por nombre..."
+                    style="padding: 10px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; width: 300px; max-width: 100%; font-size: 1rem; outline: none; transition: border-color 0.3s;"
+                    onfocus="this.style.borderColor='var(--primary-color)'"
+                    onblur="this.style.borderColor='rgba(255,255,255,0.2)'"
+                    oninput="window.updateSpeciesFilter('search', this.value)">
+
+                <button id="bitacora-layout-toggle" class="btn btn-outline"
+                    style="border-radius: 25px; border-color: #f59e0b; color: #f59e0b; padding: 10px 20px; transition: all 0.3s;"
+                    onclick="window.toggleBitacoraLayout()">
+                    🔲 Vista: Tarjetas
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtro de Condición -->
+        <div
+            style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+            <h3 style="color: var(--text-muted); font-size: 1rem; margin: 0;">Condición:</h3>
+            <button class="btn btn-primary" style="border-color: #cbd5e1; color: #f8fafc;"
+                onclick="window.updateSpeciesFilter('category', 'Todas'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Todas</button>
+            <button class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;"
+                onclick="window.updateSpeciesFilter('category', 'En Peligro'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">En
+                Peligro</button>
+            <button class="btn btn-outline" style="border-color: #10b981; color: #10b981;"
+                onclick="window.updateSpeciesFilter('category', 'Comunes'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Comunes</button>
+            <button class="btn btn-outline" style="border-color: #8b5cf6; color: #8b5cf6;"
+                onclick="window.updateSpeciesFilter('category', 'Simbólicas'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Simbólicas</button>
+            <button class="btn btn-outline" style="border-color: #3b82f6; color: #3b82f6;"
+                onclick="window.updateSpeciesFilter('category', 'Protegidas'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Protegidas</button>
+        </div>
+
+        <!-- Filtro de Tipo/Hábitat -->
+        <div
+            style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; align-items: center;">
+            <h3 style="color: var(--text-muted); font-size: 1rem; margin: 0;">Hábitat:</h3>
+            <button class="btn btn-primary" style="border-color: #cbd5e1; color: #f8fafc;"
+                onclick="window.updateSpeciesFilter('type', 'Todas'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Todas</button>
+            <button class="btn btn-outline" style="border-color: #0ea5e9; color: #0ea5e9;"
+                onclick="window.updateSpeciesFilter('type', 'Costeras'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Costeras</button>
+            <button class="btn btn-outline" style="border-color: #14b8a6; color: #14b8a6;"
+                onclick="window.updateSpeciesFilter('type', 'Manglares'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Manglares</button>
+            <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b;"
+                onclick="window.updateSpeciesFilter('type', 'Migratoria'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">Migratorias</button>
+            <button class="btn btn-outline" style="border-color: #22c55e; color: #22c55e;"
+                onclick="window.updateSpeciesFilter('type', 'De Interior'); this.parentElement.querySelectorAll('button').forEach(b=>{b.classList.replace('btn-primary', 'btn-outline'); b.style.color=b.style.borderColor;}); this.classList.replace('btn-outline', 'btn-primary'); this.style.color='#fff';">De
+                Interior</button>
+        </div>
+
+        <div id="species-album-container"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem;">
+            <!-- Las tarjetas se generan aquí vía JS -->
+        </div>
+    </main>
+
+    <!-- Vista: Reportar Avistamiento (Pantalla Completa) -->
+    <main id="report-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1400px; margin: 0 auto; margin-top: 80px; min-height: calc(100vh - 80px);">
+        <div style="display: flex; gap: 2rem; height: 100%; flex-wrap: wrap;">
+            <!-- Lado Izquierdo: Formulario -->
+            <div class="glass-effect"
+                style="flex: 1 1 450px; border-radius: 12px; padding: 2rem; display: flex; flex-direction: column;">
+                <h2 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 2rem;">Reportar Avistamiento
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Comparte tu descubrimiento. Usa el botón GPS o
+                    haz clic en el mapa de la derecha para fijar la ubicación.</p>
+
+                <form id="fullSightingForm" enctype="multipart/form-data"
+                    style="display: flex; flex-direction: column; flex: 1;">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="fullSightingBirdName"
+                            style="color: #cbd5e1; display: block; margin-bottom: 0.5rem;">Especie de Ave *</label>
+                        <select id="fullSightingBirdName" name="bird_name" required
+                            style="width: 100%; padding: 0.8rem; border-radius: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                            <option value="">Selecciona una especie...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="fullSightingLocationName"
+                            style="color: #cbd5e1; display: block; margin-bottom: 0.5rem;">Lugar de referencia *</label>
+                        <input type="text" id="fullSightingLocationName" name="location_name"
+                            placeholder="Ej: Península de Macanao" required maxlength="100"
+                            style="width: 100%; padding: 0.8rem; border-radius: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label style="color: #cbd5e1; display: block; margin-bottom: 0.5rem;">Ubicación GPS Exacta
+                            *</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input type="number" id="fullSightingLat" name="latitude" step="any" placeholder="Latitud"
+                                readonly required
+                                style="flex: 1; padding: 0.8rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; cursor: not-allowed;">
+                            <input type="number" id="fullSightingLng" name="longitude" step="any" placeholder="Longitud"
+                                readonly required
+                                style="flex: 1; padding: 0.8rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; cursor: not-allowed;">
+                        </div>
+                        <button type="button" id="fullBtnGetLocation" class="btn btn-outline"
+                            style="width: 100%; padding: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            📍 Obtener Mi Ubicación (GPS)
+                        </button>
+                        <small id="fullLocationStatus"
+                            style="color: #10b981; display: none; margin-top: 0.5rem; text-align: center;">¡Ubicación
+                            obtenida con éxito!</small>
+                        <small id="fullLocationError"
+                            style="color: #ef4444; display: none; margin-top: 0.5rem; text-align: center;">Error GPS.
+                            Haz clic en el mapa para fijar la ubicación.</small>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <label for="fullSightingDate" style="color: #cbd5e1; margin: 0;">Fecha *</label>
+                                <button type="button" id="btnHoyDate" class="btn btn-outline"
+                                    style="padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 4px; border-color: rgba(255,255,255,0.2);">🧹
+                                    Limpiar</button>
+                            </div>
+                            <div style="position: relative; width: 100%;">
+                                <!-- Cambiamos type='date' por type='text' para usar Flatpickr -->
+                                <input type="text" id="fullSightingDate" name="sighted_at"
+                                    placeholder="Escribe o selecciona (dd/mm/aaaa)" required
+                                    style="width: 100%; padding: 0.8rem 2.5rem 0.8rem 0.8rem; border-radius: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; box-sizing: border-box; height: 50.8px;">
+                                <!-- Icono de almanaque personalizado en SVG para que tome el color verde -->
+                                <svg style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--primary-light); width: 22px; height: 22px;"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: #cbd5e1; display: block; margin-bottom: 0.5rem;">Fotografía *</label>
+                            <label for="fullSightingImage"
+                                style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.8rem; border-radius: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; margin: 0; box-sizing: border-box; height: 50.8px;">
+                                <span id="fullSightingFileName"
+                                    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #94a3b8; font-size: 0.95rem;">📷
+                                    Seleccionar archivo...</span>
+                                <span
+                                    style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">Explorar</span>
+                            </label>
+                            <input type="file" id="fullSightingImage" name="imagenes" accept="image/*" multiple required
+                                style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Asistente de Clasificación IA -->
+                    <div id="aiClassificationResult"
+                        style="display: none; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #fff; flex-direction: column; gap: 0.5rem; transition: all 0.3s ease;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div
+                                style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #10b981;">
+                                <span style="font-size: 1.2rem;">🧠</span> Asistente IA Clasificador
+                            </div>
+                            <span id="aiLoader" class="spinner"
+                                style="display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+                        </div>
+                        <div id="aiStatusText" style="font-size: 0.9rem; color: #cbd5e1;">Cargando modelo...</div>
+                        <div id="aiSugerenciaDiv"
+                            style="display: none; font-size: 0.9rem; line-height: 1.4; flex-direction: column; gap: 0.5rem;">
+                            <div>
+                                Detectamos con un <strong id="aiSuggestScore" style="color: #10b981;"></strong> de
+                                probabilidad que es un(a): <strong id="aiSuggestLabel"
+                                    style="color: var(--primary-light);"></strong>.
+                            </div>
+                            <div id="aiSuggestLocalMatchDiv"
+                                style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; border-left: 3px solid var(--primary-color);">
+                                💡 Coincidencia en Nueva Esparta: <strong id="aiSuggestLocal"
+                                    style="color: #fff;"></strong>
+                            </div>
+                            <button type="button" id="btnAutoFillBird" class="btn btn-primary"
+                                style="padding: 4px 10px; font-size: 0.8rem; margin-top: 4px; width: fit-content; align-self: flex-start;">
+                                ✨ Auto-completar Formulario
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group"
+                        style="margin-bottom: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                        <label for="fullSightingDescription"
+                            style="color: #cbd5e1; display: block; margin-bottom: 0.5rem;">Notas / Descripción</label>
+                        <textarea id="fullSightingDescription" name="description" rows="3"
+                            placeholder="Ej: Visto posado en un árbol cerca de la costa..." maxlength="150"
+                            style="width: 100%; flex: 1; padding: 0.8rem; border-radius: 8px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; resize: none;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"
+                        style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: auto;"
+                        id="fullBtnSubmit">Enviar Reporte para Revisión</button>
+                </form>
+            </div>
+
+            <!-- Lado Derecho: Mapa Interactivo -->
+            <div style="flex: 1 1 500px; display: flex; flex-direction: column; gap: 1rem; height: 700px;">
+                <div class="glass-effect"
+                    style="padding: 1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.8);">
+                    <p style="color: #94a3b8; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🗺️</span>
+                        Si el GPS falla o es inexacto, puedes hacer clic en cualquier punto de este mapa para marcar
+                        manualmente el lugar exacto de tu avistamiento.
+                    </p>
+                </div>
+                <div id="report-map-container" class="glass-effect"
+                    style="flex: 1; border-radius: 12px; overflow: hidden; position: relative;">
+                    <!-- El mapa de leaflet se renderizará aquí -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista: Perfil de Usuario -->
+    <main id="profile-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px; min-height: calc(100vh - 80px);">
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+
+            <!-- Columna Izquierda: Datos del Usuario y Logros -->
+            <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="glass-effect" style="border-radius: 12px; padding: 2rem; text-align: center;">
+                    <div
+                        style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 3rem; margin: 0 auto 1.5rem auto; border: 4px solid rgba(255,255,255,0.1);">
+                        👤
+                    </div>
+                    <h2 id="profileUserName"
+                        style="color: var(--primary-color); margin-bottom: 0.5rem; text-transform: uppercase;">Usuario
+                    </h2>
+                    <p id="profileUserEmail" style="color: #94a3b8; margin-bottom: 1.5rem;">correo@ejemplo.com</p>
+                    <div
+                        style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.3rem;">TIPO DE CUENTA</div>
+                        <div style="color: var(--primary-color); font-weight: 600;">Avistador</div>
+                    </div>
+                </div>
+
+                <!-- Sección de Logros -->
+                <div class="glass-effect" style="border-radius: 12px; padding: 1.5rem;">
+                    <h3
+                        style="color: var(--primary-color); margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🏆</span> Logros y Medallas
+                    </h3>
+                    <div id="profileBadgesContainer" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div style="text-align: center; color: var(--text-muted); padding: 1rem;">Cargando logros...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Mis Avistamientos -->
+            <div style="flex: 2 1 600px;">
+                <h2
+                    style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 2rem; display: flex; align-items: center; gap: 0.8rem;">
+                    <span>📷</span> Mis Avistamientos Reportados
+                </h2>
+
+                <div id="profile-sightings-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div
+                        style="text-align: center; color: var(--text-muted); padding: 3rem; background: rgba(15, 23, 42, 0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        Cargando tus avistamientos...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Vista: Admin -->
+    <main id="admin-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px;">
+        <div class="glass-effect p-4" style="border-radius: 12px;">
+            <div class="admin-header-row">
+                <h2 class="admin-header-title">Panel de Administración</h2>
+                <div class="admin-header-actions">
+                    <a href="#/admin/avistamientos" class="btn btn-all-sightings">👀 Todos los Avistamientos</a>
+                    <a href="#/usuarios" class="btn btn-outline btn-user-dir">👥 Directorio de Usuarios</a>
+                    <a href="#/admin/respaldo" class="btn btn-outline btn-db-backup">🗄️ Respaldo de Base de Datos</a>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Modera los avistamientos reportados por los
+                usuarios antes de que aparezcan en el mapa público.</p>
+
+            <div id="admin-sightings-container" style="display: grid; gap: 1.5rem;">
+                <!-- Aquí se insertarán las tarjetas de avistamientos pendientes -->
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    Cargando avistamientos pendientes...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista: Respaldo (Admin) -->
+    <main id="admin-backup-view" class="view-section"
+        style="display: none; padding: 2rem; max-width: 1200px; margin: 0 auto; margin-top: 80px;">
+        <div class="admin-backup-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="color: var(--primary-color); font-size: 2.5rem; margin: 0;">Respaldo de Base de Datos</h2>
+            <a href="#/admin" class="btn btn-outline" style="text-decoration: none;">Volver al Panel Admin</a>
+        </div>
+        <div class="glass-effect"
+            style="padding: 2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.7); display: flex; flex-direction: column; gap: 2rem;">
+
+            <div
+                style="background: rgba(0,0,0,0.3); padding: 2rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <h3 style="color: #10b981; margin-bottom: 1rem;">Exportar Base de Datos</h3>
+                <p style="color: #94a3b8; margin-bottom: 1.5rem;">Descarga una copia completa de la base de datos
+                    (usuarios y avistamientos) en formato JSON. Es recomendable hacerlo periódicamente.</p>
+                <button class="btn btn-primary" onclick="if(window.adminManager) window.adminManager.exportDatabase()"
+                    style="background: #10b981; border: none;">⬇️ Descargar Respaldo</button>
+            </div>
+
+            <div
+                style="background: rgba(0,0,0,0.3); padding: 2rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444;">
+                <h3 style="color: #ef4444; margin-bottom: 1rem;">Importar Base de Datos</h3>
+                <p style="color: #94a3b8; margin-bottom: 1.5rem;">Restaura la base de datos a partir de un archivo JSON.
+                    <strong>⚠️ ADVERTENCIA: Esta acción sobreescribirá todos los datos actuales.</strong>
+                </p>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="backupFileInput" accept=".json"
+                        style="padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; color: #fff;">
+                    <button class="btn btn-outline"
+                        onclick="if(window.adminManager) window.adminManager.importDatabase()"
+                        style="border-color: #ef4444; color: #ef4444;">⬆️ Subir y Restaurar</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Global -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+
+                <!-- Columna 1: Brand & Descripción -->
+                <div>
+                    <a href="#/" class="footer-brand">
+                        <img src="./img-frontend/Captura_de_pantalla_2026-06-08_170731-removebg-preview.png"
+                            alt="Logo Avistar NE" style="height: 2.2rem; width: auto; object-fit: contain;">
+                        <span>AVISTAR <span style="color: #10b981;">NE</span></span>
+                    </a>
+                    <p class="footer-desc">
+                        Avistar NE es un proyecto educativo de ciencia ciudadana y monitoreo participativo para
+                        registrar la avifauna del Estado Nueva Esparta, Isla de Margarita, Coche y Cubagua.
+                    </p>
+                    <div class="footer-socials">
+                        <a href="https://instagram.com" target="_blank" rel="noopener" class="footer-social-btn"
+                            title="Instagram">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </a>
+                        <a href="https://facebook.com" target="_blank" rel="noopener" class="footer-social-btn"
+                            title="Facebook">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.5 5H18V0h-3.808C10.592 0 9 1.583 9 4.615V8z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Navegación -->
+                <div>
+                    <h4 class="footer-col-title">Navegación</h4>
+                    <ul class="footer-links-list">
+                        <li><a href="#/dashboard">Mapa Interactivo</a></li>
+                        <li><a href="#/reportar">Geolocalización GPS</a></li>
+                        <li><a href="#/especies">Catálogo de Especies</a></li>
+                        <li><a href="#/actividad">Bitácora Ciudadana</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Conservación -->
+                <div>
+                    <h4 class="footer-col-title">Conservación</h4>
+                    <p class="footer-desc" style="margin-top: 0;">
+                        Apoya activamente a organizaciones locales como <strong style="color: #10b981;">Provita</strong>
+                        en el rescate del hábitat de la Cotorra Margariteña en la Quebrada de La Chica.
+                    </p>
+                    <div class="footer-badge-pill">
+                        <span>🛡️</span> Orgullo Margariteño
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mascota / Avatar flotante sobre la línea separadora -->
+            <div class="footer-middle-bar">
+                <div class="footer-mascot-badge" title="Mascota Avistar NE">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 2C7.5 2 4 5.5 4 10C4 13.5 6 16.5 9 18V21C9 21.6 9.4 22 10 22H14C14.6 22 15 21.6 15 21V18C18 16.5 20 13.5 20 10C20 5.5 16.5 2 12 2Z"
+                            fill="#10b981" />
+                        <circle cx="9.5" cy="8.5" r="1.5" fill="#ffffff" />
+                        <circle cx="9.5" cy="8.5" r="0.75" fill="#0f172a" />
+                        <circle cx="14.5" cy="8.5" r="1.5" fill="#ffffff" />
+                        <circle cx="14.5" cy="8.5" r="0.75" fill="#0f172a" />
+                        <path d="M11 11.5L12 14L13 11.5Z" fill="#f59e0b" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Fila Inferior (Derechos y Enlaces Legales) -->
+            <div class="footer-bottom">
+                <div>
+                    © 2026 <strong>Avistar NE</strong>. Todos los derechos reservados. Desarrolladores Jose Enrique
+                    Cardona Centeno & Fraider Andres Delpino Guarin
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#"
+                        onclick="event.preventDefault(); window.modalManager.showMessage('Políticas de Privacidad', 'En Avistar NE respetamos tu privacidad. Los datos de geolocalización de las especies vulnerables (como la Cotorra Margariteña) son difuminados públicamente para evitar el tráfico de fauna. Tu correo electrónico y datos personales están encriptados y jamás serán compartidos con terceros sin tu consentimiento.', 'success');">Políticas
+                        de Privacidad</a>
+                    <a href="#"
+                        onclick="event.preventDefault(); window.modalManager.showMessage('Términos de Ciencia Ciudadana', 'Al reportar un avistamiento, aceptas que la información, fotografías y ubicación formarán parte de una base de datos abierta para fines educativos y de conservación ambiental en el Estado Nueva Esparta. Te comprometes a no subir fotos falsas ni perturbar el hábitat natural de las aves.', 'success');">Términos
+                        de Ciencia Ciudadana</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <!-- Leaflet Marker Cluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+    <script>
+        // Inicializar el Almanaque
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById("fullSightingDate");
+            if (dateInput) {
+                const fp = flatpickr(dateInput, {
+                    locale: "es",           // Idioma español
+                    dateFormat: "Y-m-d",    // Formato de guardado
+                    altInput: true,         // Crear un input visible alternativo
+                    altFormat: "d/m/Y",     // Formato visible para el usuario (dd/mm/aaaa)
+                    allowInput: true,       // PERMITE ESCRIBIR MANUALMENTE
+                    maxDate: "today",       // No permite fechas futuras
+                    disableMobile: true     // Fuerza el uso de este almanaque en móviles también
+                });
+
+                // Botón Limpiar
+                const btnHoy = document.getElementById("btnHoyDate");
+                if (btnHoy) {
+                    btnHoy.addEventListener("click", () => {
+                        fp.clear(); // Limpia el calendario de forma segura
+                    });
+                }
+            }
+        });
+    </script>
+
+    <!-- Botón Volver Arriba -->
+    <button id="scrollToTopBtn" aria-label="Volver arriba">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+            style="width: 24px; height: 24px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
+
+    <script>
+        // ---- Scroll to Top ----
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('scrollToTopBtn');
+            if (btn) {
+                window.addEventListener('scroll', () => {
+                    btn.classList.toggle('visible', window.scrollY > 300);
+                });
+                btn.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        });
+
+        // ---- Mobile Drawer ----
+        window.toggleMobileMenu = function () {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+            const isOpen = drawer.classList.contains('is-open');
+            if (isOpen) {
+                window.closeMobileMenu();
+            } else {
+                drawer.classList.add('is-open');
+                overlay.style.display = 'block';
+                // Trigger reflow so transition fires
+                requestAnimationFrame(() => overlay.classList.add('is-open'));
+                btn.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+                // Sync auth state
+                window._syncMobileDrawerAuth && window._syncMobileDrawerAuth();
+            }
+        };
+
+        window.closeMobileMenu = function () {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const btn = document.getElementById('mobileMenuBtn');
+            drawer.classList.remove('is-open');
+            overlay.classList.remove('is-open');
+            btn.classList.remove('is-open');
+            document.body.style.overflow = '';
+            setTimeout(() => { overlay.style.display = 'none'; }, 380);
+        };
+
+        // Close drawer on ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') window.closeMobileMenu();
+        });
+
+        // Sync mobile auth state whenever drawer opens
+        window._syncMobileDrawerAuth = function () {
+            const isAuth = window.authManager && window.authManager.isAuthenticated;
+            const guestEl = document.getElementById('mobileAuthGuest');
+            const userEl = document.getElementById('mobileAuthUser');
+            if (!guestEl || !userEl) return;
+
+            if (isAuth) {
+                guestEl.style.display = 'none';
+                userEl.style.display = 'flex';
+                const user = window.authManager.currentUser || {};
+                const nameEl = document.getElementById('mobileUserName');
+                const roleEl = document.getElementById('mobileUserRole');
+                if (nameEl) nameEl.textContent = (user.name || user.email || 'Usuario').toUpperCase();
+                if (roleEl) roleEl.textContent = user.role === 'admin' ? 'Administrador 🦅' : 'Avistador 🌿';
+
+                // Mostrar link admin en movil si es administrador
+                const mobileAdminLink = document.getElementById('mobileAdminLink');
+                if (mobileAdminLink) {
+                    mobileAdminLink.style.display = user.role === 'admin' ? 'block' : 'none';
+                }
+
+                // Wire mobile logout
+                const mLogout = document.getElementById('mobileBtnLogout');
+                if (mLogout) {
+                    mLogout.onclick = (e) => {
+                        e.preventDefault();
+                        window.closeMobileMenu();
+                        const desktopLogout = document.getElementById('btnLogout');
+                        if (desktopLogout) desktopLogout.click();
+                    };
+                }
+            } else {
+                guestEl.style.display = 'flex';
+                userEl.style.display = 'none';
+            }
+        };
+
+        // Also update mobile theme icon label on toggle
+        const _origToggleTheme = window.toggleTheme;
+        // Will be overridden by app.js but we hook after load
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeRow = document.querySelector('.mobile-drawer-theme-row span:nth-child(2)');
+            const themeIcon = document.querySelector('.mobile-drawer-theme-row .theme-icon-el');
+            function updateMobileThemeLabel() {
+                const isDark = !document.body.classList.contains('light-theme');
+                if (themeIcon) themeIcon.textContent = isDark ? '🌙' : '☀️';
+                if (themeRow) themeRow.textContent = isDark ? 'Modo Oscuro' : 'Modo Claro';
+            }
+            updateMobileThemeLabel();
+            // Observe body class changes
+            const obs = new MutationObserver(updateMobileThemeLabel);
+            obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        });
+    </script>
+
+
+    <!-- App Entry Point -->
+    <script type="module" src="./assets/js/app.js"></script>
+
+</body>
+
+</html>
