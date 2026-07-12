@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="./config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avistar NE - Acceso</title>
@@ -590,7 +591,7 @@
         }
 
         // API URL Configuration
-        const API_URL = 'http://localhost:5000/api';
+        const API_URL = window.APP_CONFIG.API_URL;
 
         // Login Handler
         document.getElementById('loginForm').addEventListener('submit', async (e) => {

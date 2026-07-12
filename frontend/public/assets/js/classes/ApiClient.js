@@ -1,5 +1,5 @@
 export class ApiClient {
-    constructor(baseURL = 'http://localhost:5000/api') {
+    constructor(baseURL = window.APP_CONFIG.API_URL) {
         this.baseURL = baseURL;
         this.token = null;
     }

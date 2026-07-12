@@ -640,7 +640,7 @@ router.add('/perfil', async () => {
             card.style.alignItems = 'center';
 
             // Buscar foto fallback en el catálogo nativo si no hay foto subida por el usuario
-            let imageUrl = s.image_url ? (s.image_url.startsWith('http') ? s.image_url : `http://localhost:5000${s.image_url}`) : null;
+            let imageUrl = s.image_url ? (s.image_url.startsWith('http') ? s.image_url : window.APP_CONFIG.BASE_URL + '${s.image_url}') : null;
             if (!imageUrl && window.nativeBirdsData) {
                 const matchedBird = window.nativeBirdsData.find(b => b.name.toLowerCase().includes(s.bird_name.toLowerCase()) || s.bird_name.toLowerCase().includes(b.name.toLowerCase()));
                 if (matchedBird && matchedBird.images && matchedBird.images.length > 0) {
@@ -1117,7 +1117,7 @@ router.add('#/perfil', async () => {
     document.getElementById('profileNameDisplay').value = user.name;
 
     if (user.profile_image) {
-        document.getElementById('profileImagePreview').innerHTML = `<img src="http://localhost:5000${user.profile_image}" style="width:100%;height:100%;object-fit:cover;">`;
+        document.getElementById('profileImagePreview').innerHTML = `<img src=window.APP_CONFIG.BASE_URL + '${user.profile_image}' style="width:100%;height:100%;object-fit:cover;">`;
     } else {
         document.getElementById('profileImagePreview').innerHTML = '👤';
     }
@@ -2354,7 +2354,7 @@ window.playBirdAudio = async function (scientificName, buttonEl) {
         if (window.api && typeof window.api.get === 'function') {
             data = await window.api.get(`/species/audio?scientificName=${encodeURIComponent(scientificName)}`);
         } else {
-            const res = await fetch(`http://localhost:5000/api/species/audio?scientificName=${encodeURIComponent(scientificName)}`);
+            const res = await fetch(window.APP_CONFIG.API_URL + '/species/audio?scientificName=${encodeURIComponent(scientificName)}');
             data = await res.json();
         }
 
@@ -2862,7 +2862,7 @@ async function loadActividadSightings() {
     if (!container) return;
 
     try {
-        const response = await fetch('http://localhost:5000/api/sightings');
+        const response = await fetch(window.APP_CONFIG.API_URL + '/sightings');
         if (response.ok) {
             const data = await response.json();
 
@@ -2889,7 +2889,7 @@ async function loadActividadSightings() {
             container.innerHTML = renderItems.map(s => `
                     <div class="bird-card glass-effect" style="flex: 0 0 auto; width: 250px; height: 320px; padding: 0; cursor: pointer; transition: transform 0.3s; margin-bottom: 0.5rem; display: flex; flex-direction: column; overflow: hidden;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="window.location.hash='#/dashboard'">
                         <div style="height: 180px; width: 100%; background: #000; flex-shrink: 0; position: relative;">
-                            ${s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : 'http://localhost:5000' + s.image_url}" onerror="this.src='${s.image_url}'" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">` : `<div style="width:100%; height:100%; background:#1e293b; display:flex; align-items:center; justify-content:center;">Sin foto</div>`}
+                            ${s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : window.APP_CONFIG.BASE_URL + s.image_url}" onerror="this.src='${s.image_url}'" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">` : `<div style="width:100%; height:100%; background:#1e293b; display:flex; align-items:center; justify-content:center;">Sin foto</div>`}
                             <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: linear-gradient(to top, rgba(15,23,42,1), transparent);"></div>
                         </div>
                         <div style="flex: 1; padding: 1rem; display: flex; flex-direction: column; text-align: center; justify-content: center;">

@@ -16,7 +16,13 @@ const app = express();
 // Middlewares
 app.use(compression());
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
+    origin: function (origin, callback) {
+        if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('vercel.app') || origin === process.env.FRONTEND_URL) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json());

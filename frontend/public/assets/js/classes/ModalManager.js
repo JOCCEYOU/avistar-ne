@@ -345,9 +345,9 @@ export class ModalManager {
         }
 
         if (imagenesArr.length > 0) {
-            images = imagenesArr.map(img => img.startsWith('http') ? img : 'http://localhost:5000' + img);
+            images = imagenesArr.map(img => img.startsWith('http') ? img : window.APP_CONFIG.BASE_URL + img);
         } else if (sighting.image_url) {
-            images = [sighting.image_url.startsWith('http') ? sighting.image_url : 'http://localhost:5000' + sighting.image_url];
+            images = [sighting.image_url.startsWith('http') ? sighting.image_url : window.APP_CONFIG.BASE_URL + sighting.image_url];
         } else {
             images = ['./img-frontend/placeholder.png'];
         }

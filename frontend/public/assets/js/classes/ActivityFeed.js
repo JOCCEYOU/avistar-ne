@@ -66,7 +66,7 @@ export class ActivityFeed {
                 console.error("Error parsing sighting.imagenes in ActivityFeed", e);
             }
             const imgUrl = imagenesArr.length > 0 ? imagenesArr[0] : (sighting.image_url || sighting.imageUrl);
-            const fullImgUrl = imgUrl ? (imgUrl.startsWith('http') ? imgUrl : 'http://localhost:5000' + imgUrl) : '';
+            const fullImgUrl = imgUrl ? (imgUrl.startsWith('http') ? imgUrl : window.APP_CONFIG.BASE_URL + imgUrl) : '';
 
             return `
             <div class="bird-card glass-effect" style="flex: 0 0 auto; padding: 0; cursor: pointer; transition: transform 0.3s; display: flex; flex-direction: column; overflow: hidden; height: 380px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='none'" onclick="if(window.openSightingDetailsGlobal) window.openSightingDetailsGlobal(${sighting.id})">

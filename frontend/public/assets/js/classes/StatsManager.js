@@ -8,7 +8,7 @@ export class StatsManager {
 
     async fetchStats() {
         try {
-            const response = await fetch('http://localhost:5000/api/stats');
+            const response = await fetch(window.APP_CONFIG.API_URL + '/stats');
             if (response.ok) {
                 this.data = await response.json();
                 localStorage.setItem('avistar_stats_backup', JSON.stringify(this.data));
@@ -152,7 +152,7 @@ export class StatsManager {
                     if (token) {
                         headers['Authorization'] = `Bearer ${token}`;
                     }
-                    const url = 'http://localhost:5000/api/sightings/export';
+                    const url = window.APP_CONFIG.API_URL + '/sightings/export';
                     fetch(url, { headers })
                         .then(response => {
                             if (response.ok) return response.blob();

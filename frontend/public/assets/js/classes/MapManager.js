@@ -331,7 +331,7 @@ export class MapManager {
         const routeColor = imageUrl ? '#10b981' : '#3b82f6';
 
         const iconHtml = imageUrl
-            ? `<div style="width:46px;height:46px;border-radius:50%;border:3px solid ${routeColor};overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.6);background:#1e293b;"><img src="${imageUrl.startsWith('http') ? imageUrl : 'http://localhost:5000' + imageUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='${imageUrl}'"></div>`
+            ? `<div style="width:46px;height:46px;border-radius:50%;border:3px solid ${routeColor};overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.6);background:#1e293b;"><img src="${imageUrl.startsWith('http') ? imageUrl : window.APP_CONFIG.BASE_URL + imageUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='${imageUrl}'"></div>`
             : `<div style="width:46px;height:46px;border-radius:50%;border:3px solid ${routeColor};overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.6);background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:22px;">🐦</div>`;
 
         const customIcon = L.divIcon({ className: 'custom-bird-bubble', html: iconHtml, iconSize: [46,46], iconAnchor: [23,23], popupAnchor: [0,-23] });
@@ -361,7 +361,7 @@ export class MapManager {
             <div class="map-popup-card bg-slate-900 text-slate-100 p-3 rounded-xl border border-slate-700/50 shadow-2xl flex flex-col gap-2 min-w-[260px] max-w-[300px]">
                 <div style="position: relative; width:100%; height:130px; border-radius:8px; overflow:hidden; background:#0b0f19; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.06);">
                     ${imageUrl 
-                        ? `<img src="${imageUrl.startsWith('http') ? imageUrl : 'http://localhost:5000' + imageUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${imageUrl}'">`
+                        ? `<img src="${imageUrl.startsWith('http') ? imageUrl : window.APP_CONFIG.BASE_URL + imageUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='${imageUrl}'">`
                         : `<span style="font-size:2.5rem;">🐦</span>`
                     }
                     ${isUnknown 

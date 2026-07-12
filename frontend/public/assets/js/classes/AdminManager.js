@@ -242,7 +242,7 @@ class AdminManager {
             const token = sessionStorage.getItem('authToken');
             if (!token) throw new Error('No estás autenticado');
 
-            const response = await fetch('http://localhost:5000/api/sightings', {
+            const response = await fetch(window.APP_CONFIG.API_URL + '/sightings', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -304,9 +304,9 @@ class AdminManager {
                 <div class="admin-pending-img-container" style="border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5);">
                     ${imagenesArr.length > 0 ? 
                         `<div style="display: flex; gap: 2px; overflow-x: auto; height: 100%;">
-                            ${imagenesArr.map(img => `<img src="${img.startsWith('http') ? img : 'http://localhost:5000' + img}" style="height: 100%; min-width: 100px; flex: 1; object-fit: cover;">`).join('')}
+                            ${imagenesArr.map(img => `<img src="${img.startsWith('http') ? img : window.APP_CONFIG.BASE_URL + img}" style="height: 100%; min-width: 100px; flex: 1; object-fit: cover;">`).join('')}
                         </div>`
-                    : (s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : 'http://localhost:5000' + s.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#666;">Sin foto</div>')}
+                    : (s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : window.APP_CONFIG.BASE_URL + s.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#666;">Sin foto</div>')}
                 </div>
                 <div class="admin-pending-info" style="display: flex; flex-direction: column; justify-content: center;">
                     <h3 style="color: ${isUnknown ? '#eab308' : 'var(--primary-color)'}; margin-bottom: 0.5rem; font-size: 1.4rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -343,7 +343,7 @@ class AdminManager {
                 bodyData.bird_name = assignedBirdName;
             }
 
-            const res = await fetch(`http://localhost:5000/api/sightings/${id}/approve`, {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}/approve', {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -369,7 +369,7 @@ class AdminManager {
     async rejectSighting(id, refreshFullscreen = false) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/sightings/${id}/reject`, {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}/reject', {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -393,7 +393,7 @@ class AdminManager {
     async deleteSighting(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/sightings/${id}`, {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}', {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -424,7 +424,7 @@ class AdminManager {
             const token = sessionStorage.getItem('authToken');
             if (!token) throw new Error('No estás autenticado');
 
-            const response = await fetch('http://localhost:5000/api/sightings', {
+            const response = await fetch(window.APP_CONFIG.API_URL + '/sightings', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -459,9 +459,9 @@ class AdminManager {
                     <div style="height: 180px; width: 100%; background: #0f172a; position: relative;">
                         ${imagenesArr.length > 0 ? 
                             `<div style="display: flex; gap: 2px; overflow-x: auto; height: 100%;">
-                                ${imagenesArr.map(img => `<img src="${img.startsWith('http') ? img : 'http://localhost:5000' + img}" style="height: 100%; min-width: 100px; flex: 1; object-fit: cover;">`).join('')}
+                                ${imagenesArr.map(img => `<img src="${img.startsWith('http') ? img : window.APP_CONFIG.BASE_URL + img}" style="height: 100%; min-width: 100px; flex: 1; object-fit: cover;">`).join('')}
                             </div>`
-                        : (s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : 'http://localhost:5000' + s.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#666;">Sin foto</div>')}
+                        : (s.image_url ? `<img src="${s.image_url.startsWith('http') ? s.image_url : window.APP_CONFIG.BASE_URL + s.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#666;">Sin foto</div>')}
                         <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">${statusBadge}</div>
                     </div>
                     <div style="padding: 1.2rem; display: flex; flex-direction: column; flex-grow: 1;">
@@ -499,7 +499,7 @@ class AdminManager {
                 container.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 2rem;">No tienes permiso para ver esto.</div>';
                 return;
             }
-            const res = await fetch('http://localhost:5000/api/users', {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -573,7 +573,7 @@ class AdminManager {
     async suspendUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/users/${id}/suspend`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/suspend', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario suspendido correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -586,7 +586,7 @@ class AdminManager {
     async activateUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/users/${id}/activate`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/activate', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario activado correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -599,7 +599,7 @@ class AdminManager {
     async deleteUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario eliminado correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -612,7 +612,7 @@ class AdminManager {
     async makeAdmin(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/users/${id}/make-admin`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/make-admin', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario promovido a Administrador.', 'success');
                 this.fetchAndRenderUserList();
@@ -625,7 +625,7 @@ class AdminManager {
     async revokeAdmin(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/users/${id}/revoke-admin`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/revoke-admin', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Se revocaron los permisos de administrador al usuario.', 'success');
                 this.fetchAndRenderUserList();
@@ -642,7 +642,7 @@ class AdminManager {
 
             if (window.modalManager) window.modalManager.showLoading('Exportando base de datos...');
 
-            const res = await fetch('http://localhost:5000/api/backup/export', {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/backup/export', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -704,7 +704,7 @@ class AdminManager {
             const formData = new FormData();
             formData.append('backup', fileInput.files[0]);
 
-            const res = await fetch('http://localhost:5000/api/backup/import', {
+            const res = await fetch(window.APP_CONFIG.API_URL + '/backup/import', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
