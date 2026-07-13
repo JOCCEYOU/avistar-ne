@@ -360,7 +360,7 @@ export class ModalManager {
             return `
             <div class="bird-bubble" data-index="${idx}" onclick="window.selectBirdBubble(this)" style="position: relative; z-index: 1; width: ${size}; height: ${size}; order: ${order}; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #10b981, #3b82f6); background-size: 200% 200%; animation: gradientShift 5s ease infinite; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; opacity: ${opacity}; flex-shrink: 0;">
                 <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #1e293b;">
-                    <img src="${img}" alt="Reporte" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="${img}" alt="Reporte" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='./img-frontend/placeholder.png'">
                 </div>
             </div>
             `;
@@ -439,7 +439,7 @@ export class ModalManager {
             return `
             <div class="bird-bubble" data-index="${idx}" onclick="window.selectBirdBubble(this)" style="position: relative; z-index: 1; width: ${size}; height: ${size}; order: ${order}; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #ff0f7b, #f89b29, #ff0f7b); background-size: 200% 200%; animation: gradientShift 5s ease infinite; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; opacity: ${opacity}; flex-shrink: 0;">
                 <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #1e293b;">
-                    <img src="${img}" alt="${bird.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="${img}" alt="${bird.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='./img-frontend/placeholder.png'">
                 </div>
             </div>
             `;

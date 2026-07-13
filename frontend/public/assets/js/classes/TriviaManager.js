@@ -1007,9 +1007,23 @@ export class TriviaManager {
     }
 
     startNewRound() {
-        // Mezclar las 100 preguntas de forma aleatoria (Fisher-Yates Shuffle)
+        // Mezclar las preguntas de forma aleatoria
         const shuffled = [...this.questionsPool].sort(() => 0.5 - Math.random());
-        this.currentRoundQuestions = shuffled.slice(0, this.questionsPerRound);
+        this.currentRoundQuestions = shuffled.slice(0, this.questionsPerRound).map(q => {
+            // Clonar la pregunta y sus opciones
+            const newQ = { ...q, options: [...q.options] };
+            // Encontrar el texto de la respuesta correcta original
+            const correctText = newQ.options[newQ.correct];
+            // Remover los prefijos 'A) ', 'B) ', etc. de todas las opciones para poder mezclarlas libremente
+            const cleanOptions = newQ.options.map(opt => opt.replace(/^[A-Z]\)\s*/, ''));
+            const cleanCorrectText = correctText.replace(/^[A-Z]\)\s*/, '');
+            // Mezclar las opciones limpias
+            cleanOptions.sort(() => 0.5 - Math.random());
+            // Actualizar la pregunta con las opciones mezcladas y el nuevo índice correcto
+            newQ.options = cleanOptions;
+            newQ.correct = cleanOptions.indexOf(cleanCorrectText);
+            return newQ;
+        });
         this.currentIndex = 0;
         this.score = 0;
         this.isAnswered = false;

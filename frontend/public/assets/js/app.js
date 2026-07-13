@@ -233,9 +233,11 @@ function updateUIForAuth(isAuthenticated = auth.isAuthenticated) {
     const adminLink = document.getElementById('adminLink');
     const trigger = document.getElementById('userDropdownTrigger');
     const roleDisplay = document.getElementById('userRoleDisplay');
+    const heroJoinBtn = document.getElementById('heroJoinBtn');
 
     if (isAuthenticated) {
         if (authButtons) authButtons.style.display = 'none';
+        if (heroJoinBtn) heroJoinBtn.style.display = 'none';
         if (userMenu) {
             userMenu.style.display = 'flex';
             const name = auth.currentUser?.name || 'Usuario';
@@ -271,6 +273,7 @@ function updateUIForAuth(isAuthenticated = auth.isAuthenticated) {
         window._syncMobileDrawerAuth && window._syncMobileDrawerAuth();
     } else {
         if (authButtons) authButtons.style.display = 'flex';
+        if (heroJoinBtn) heroJoinBtn.style.display = 'inline-block';
         if (userMenu) userMenu.style.display = 'none';
         if (adminLink) {
             adminLink.classList.remove('admin-approved-user');
