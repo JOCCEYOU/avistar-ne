@@ -1,4 +1,4 @@
-const CACHE_NAME = 'avistar-ne-v5';
+const CACHE_NAME = 'avistar-ne-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
