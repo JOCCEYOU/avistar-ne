@@ -343,7 +343,7 @@ class AdminManager {
                 bodyData.bird_name = assignedBirdName;
             }
 
-            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}/approve', {
+            const res = await fetch(window.APP_CONFIG.API_URL + `/sightings/${id}/approve`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -369,7 +369,7 @@ class AdminManager {
     async rejectSighting(id, refreshFullscreen = false) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}/reject', {
+            const res = await fetch(window.APP_CONFIG.API_URL + `/sightings/${id}/reject`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -393,7 +393,7 @@ class AdminManager {
     async deleteSighting(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/sightings/${id}', {
+            const res = await fetch(window.APP_CONFIG.API_URL + `/sightings/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -573,7 +573,7 @@ class AdminManager {
     async suspendUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/suspend', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + `/users/${id}/suspend`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario suspendido correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -586,7 +586,7 @@ class AdminManager {
     async activateUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/activate', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + `/users/${id}/activate`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario activado correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -599,7 +599,7 @@ class AdminManager {
     async deleteUser(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + `/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario eliminado correctamente.', 'success');
                 this.fetchAndRenderUserList();
@@ -612,7 +612,7 @@ class AdminManager {
     async makeAdmin(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/make-admin', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + `/users/${id}/make-admin`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Usuario promovido a Administrador.', 'success');
                 this.fetchAndRenderUserList();
@@ -625,7 +625,7 @@ class AdminManager {
     async revokeAdmin(id) {
         try {
             const token = sessionStorage.getItem('authToken');
-            const res = await fetch(window.APP_CONFIG.API_URL + '/users/${id}/revoke-admin', { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
+            const res = await fetch(window.APP_CONFIG.API_URL + `/users/${id}/revoke-admin`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }});
             if (res.ok) {
                 if (window.modalManager) window.modalManager.showMessage('Éxito', 'Se revocaron los permisos de administrador al usuario.', 'success');
                 this.fetchAndRenderUserList();
