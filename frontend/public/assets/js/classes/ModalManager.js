@@ -110,7 +110,7 @@ export class ModalManager {
                     <form id="registerForm">
                         <div class="form-group">
                             <label for="registerName" style="color: white !important;">Nombre completo</label>
-                            <input type="text" id="registerName" placeholder="Juan Pérez" required>
+                            <input type="text" id="registerName" placeholder="Juan Pérez" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" required>
                         </div>
                         <div class="form-group">
                             <label for="registerEmail" style="color: white !important;">Correo</label>
@@ -975,24 +975,59 @@ export class ModalManager {
                     }
                 });
 
+                let initialDistance = 0;
+                let initialScale = 1;
+
                 wrapper.addEventListener('touchstart', (e) => {
-                    if (e.touches.length === 1 && !e.target.closest('button') && !e.target.closest('.bird-zone-wrapper')) {
+                    if (e.target.closest('button') || e.target.closest('.bird-zone-wrapper')) return;
+                    
+                    if (e.touches.length === 1) {
                         isDragging = true;
                         startX = e.touches[0].clientX - panX;
                         startY = e.touches[0].clientY - panY;
+                    } else if (e.touches.length === 2) {
+                        isDragging = false; // Stop panning when zooming
+                        initialDistance = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        initialScale = scale;
                     }
                 }, { passive: false });
 
                 window.addEventListener('touchmove', (e) => {
-                    if (!isDragging || e.touches.length !== 1) return;
-                    e.preventDefault();
-                    panX = e.touches[0].clientX - startX;
-                    panY = e.touches[0].clientY - startY;
-                    updateTransform();
+                    if (e.touches.length === 1 && isDragging) {
+                        e.preventDefault();
+                        panX = e.touches[0].clientX - startX;
+                        panY = e.touches[0].clientY - startY;
+                        updateTransform();
+                    } else if (e.touches.length === 2) {
+                        e.preventDefault();
+                        const currentDistance = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        if (initialDistance > 0) {
+                            const ratio = currentDistance / initialDistance;
+                            scale = initialScale * ratio;
+                            scale = Math.min(Math.max(0.2, scale), 4);
+                            updateTransform();
+                        }
+                    }
                 }, { passive: false });
 
-                window.addEventListener('touchend', () => {
-                    isDragging = false;
+                window.addEventListener('touchend', (e) => {
+                    if (e.touches.length < 2) {
+                        initialDistance = 0;
+                    }
+                    if (e.touches.length === 0) {
+                        isDragging = false;
+                    } else if (e.touches.length === 1) {
+                        // Resync pan start coordinates so we don't jump when lifting one finger
+                        isDragging = true;
+                        startX = e.touches[0].clientX - panX;
+                        startY = e.touches[0].clientY - panY;
+                    }
                 });
             }
             

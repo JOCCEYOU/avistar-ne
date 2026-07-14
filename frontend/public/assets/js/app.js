@@ -2810,15 +2810,86 @@ function renderBirdGallery() {
                 0% { transform: translateX(0); }
                 100% { transform: translateX(calc(-1 * ${group3WidthStr})); }
             }
-            #bird-gallery-track-1 { animation: scrollMarqueeLeft1 30s linear infinite; }
-            #bird-gallery-track-2 { animation: scrollMarqueeRight2 35s linear infinite; }
-            #bird-gallery-track-3 { animation: scrollMarqueeLeft3 25s linear infinite; }
+            #bird-gallery-track-1 { animation: scrollMarqueeLeft1 60s linear infinite; }
+            #bird-gallery-track-2 { animation: scrollMarqueeRight2 70s linear infinite; }
+            #bird-gallery-track-3 { animation: scrollMarqueeLeft3 50s linear infinite; }
             
             #bird-gallery-track-1:hover, #bird-gallery-track-2:hover, #bird-gallery-track-3:hover {
                 animation-play-state: paused;
             }
+            
+            .carousel-manual-mode .bird-carousel-track {
+                animation: none !important;
+                transform: translateX(0) !important;
+            }
+            .carousel-manual-mode .bird-carousel-viewport {
+                overflow-x: auto !important;
+                scroll-behavior: smooth;
+            }
+            .carousel-manual-mode .bird-carousel-viewport::-webkit-scrollbar {
+                height: 8px;
+            }
+            .carousel-manual-mode .bird-carousel-viewport::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.1);
+                border-radius: 4px;
+            }
+            .carousel-manual-mode .bird-carousel-viewport::-webkit-scrollbar-thumb {
+                background: rgba(16, 185, 129, 0.5);
+                border-radius: 4px;
+            }
+            .carousel-manual-mode .carousel-nav-btn {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 10;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: rgba(255, 255, 255, 0.9);
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                cursor: pointer;
+                font-size: 1.5rem;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                transition: all 0.3s ease;
+            }
+            .carousel-manual-mode .carousel-nav-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.4);
+                color: #fff;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+                transform: translateY(-50%) scale(1.1);
+            }
+            .carousel-manual-mode .carousel-nav-btn:active {
+                transform: translateY(-50%) scale(0.95);
+            }
+            .carousel-manual-mode .prev-btn {
+                left: 1rem;
+            }
+            .carousel-manual-mode .next-btn {
+                right: 1rem;
+            }
+
         `;
     document.head.appendChild(style);
+
+    const toggleBtn = document.getElementById('toggleCarouselBtn');
+    const carouselsContainer = document.querySelector('.bird-carousels-container');
+    if (toggleBtn && carouselsContainer) {
+        toggleBtn.addEventListener('click', () => {
+            const isManual = carouselsContainer.classList.toggle('carousel-manual-mode');
+            if (isManual) {
+                toggleBtn.textContent = 'Activar Movimiento Automático';
+            } else {
+                toggleBtn.textContent = 'Pausar y Mover Manualmente';
+            }
+        });
+    }
 }
 
 // Cargar datos del dashboard
@@ -2988,7 +3059,7 @@ function renderFloatingDecorations() {
         img.src = bird.images && bird.images.length > 0 ? bird.images[0] : '';
         img.title = bird.name;
         img.className = 'floating-dec';
-        img.style.cssText = `${side}; top: ${top}px; width: ${size}px; height: ${size}px; --rot: ${rot}deg; animation-duration: ${dur}s; animation-delay: ${delay}s; border-radius: 50%; opacity: 0.9; cursor: pointer; transition: transform 0.3s ease;`;
+        img.style.cssText = `${side}; top: ${top}px; width: ${size}px; height: ${size}px; --rot: ${rot}deg; animation-duration: ${dur}s; animation-delay: ${delay}s; border-radius: 50%; opacity: 0.9; cursor: pointer; transition: transform 0.3s ease, z-index 0s; pointer-events: auto; z-index: 0; position: absolute;`;
 
         img.onclick = () => {
             if (window.modalManager) window.modalManager.openBirdDetails(bird);

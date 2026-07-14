@@ -372,7 +372,7 @@
                         <form id="registerForm">
                             <div class="form-group">
                                 <label style="color: white !important;">Nombre completo</label>
-                                <input type="text" id="registerName" placeholder="Juan Pérez" required>
+                                <input type="text" id="registerName" placeholder="Juan Pérez" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')" required>
                             </div>
                             <div class="form-group">
                                 <label style="color: white !important;">Correo</label>
