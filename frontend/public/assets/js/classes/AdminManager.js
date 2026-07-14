@@ -541,11 +541,11 @@ class AdminManager {
                             ? `<button onclick="window.adminManager.activateUser(${u.id})" class="btn btn-outline" style="border-color: #10b981; color: #10b981; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Activar Usuario">✅ Activar</button>`
                             : `<button onclick="window.adminManager.suspendUser(${u.id})" class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Suspender Usuario">🚫 Suspender</button>`
                         }
-                        <button onclick="if(confirm('¿Eliminar usuario permanentemente?')) window.adminManager.deleteUser(${u.id})" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Eliminar Usuario">🗑️ Eliminar</button>
-                        <button onclick="if(confirm('¿Hacer Administrador a este usuario?')) window.adminManager.makeAdmin(${u.id})" class="btn btn-outline" style="border-color: #3b82f6; color: #3b82f6; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Hacer Admin">🛡️ Crear Admin</button>
+                        <button onclick="window.modalManager.showConfirm('Confirmar Acción', '¿Eliminar usuario permanentemente?', () => window.adminManager.deleteUser(${u.id}), 'danger')" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Eliminar Usuario">🗑️ Eliminar</button>
+                        <button onclick="window.modalManager.showConfirm('Confirmar Acción', '¿Hacer Administrador a este usuario?', () => window.adminManager.makeAdmin(${u.id}), 'info')" class="btn btn-outline" style="border-color: #3b82f6; color: #3b82f6; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Hacer Admin">🛡️ Crear Admin</button>
                     ` : ''}
                     ${u.role === 'admin' && u.id !== 1 ? `
-                        <button onclick="if(confirm('¿Eliminar permisos de Administrador?')) window.adminManager.revokeAdmin(${u.id})" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Revocar Admin">❌ Revocar Permisos</button>
+                        <button onclick="window.modalManager.showConfirm('Confirmar Acción', '¿Eliminar permisos de Administrador?', () => window.adminManager.revokeAdmin(${u.id}), 'warning')" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444; font-size: 0.75rem; padding: 0.3rem 0.6rem;" title="Revocar Admin">❌ Revocar Permisos</button>
                     ` : ''}
                 </div>
             </div>

@@ -2538,11 +2538,14 @@ function generateHabitatZones(bird) {
 window.showBirdOnMap = function (birdName) {
     const bird = nativeBirds.find(b => b.name === birdName);
     if (bird) {
+        if (window.modalManager) window.modalManager.close();
+        if (window.mapManager) window.mapManager.isCustomView = true;
         const habitatPoints = generateHabitatZones(bird);
 
         window.location.hash = '/dashboard';
         setTimeout(() => {
             if (window.mapManager && window.mapManager.map) {
+                window.mapManager.isCustomView = true;
                 // Limpiar marcadores anteriores
                 window.mapManager.clearMarkers();
 
@@ -2633,6 +2636,7 @@ window.currentMapFilters = {
 
 window.applyMapFilters = function () {
     if (!window.mapManager || !window.mapManager.map || !window.nativeBirdsData) return;
+    if (window.mapManager.isCustomView) return; // FIX: Prevent overwriting custom views
 
     // Limpiar marcadores anteriores
     window.mapManager.clearMarkers();
@@ -2673,6 +2677,8 @@ window.applyMapFilters = function () {
 
     // 3. Filtrar y renderizar avistamientos de la comunidad
     window.sightingManager.fetchAll().then(sightings => {
+        if (window.mapManager.isCustomView) return; // FIX: Prevent overwriting after async fetch
+        
         const filteredSightings = (sightings || []).filter(sighting => {
             const bird = window.nativeBirdsData.find(b => b.name === sighting.bird_name);
             if (!bird) {
@@ -2705,6 +2711,8 @@ window.applyMapFilters = function () {
 };
 
 window.filterMapBirds = function (filterType, value, buttonEl) {
+    if (window.mapManager) window.mapManager.isCustomView = false;
+    
     if (filterType === 'category') {
         window.currentMapFilters.category = value;
     } else if (filterType === 'type') {
@@ -2723,6 +2731,8 @@ window.filterMapBirds = function (filterType, value, buttonEl) {
 };
 
 window.resetMapToAllBirds = function () {
+    if (window.mapManager) window.mapManager.isCustomView = false;
+    
     window.currentMapFilters = {
         category: 'Todas',
         type: 'Todas'
@@ -2825,6 +2835,10 @@ function renderBirdGallery() {
             .carousel-manual-mode .bird-carousel-viewport {
                 overflow-x: auto !important;
                 scroll-behavior: smooth;
+                scroll-snap-type: x mandatory !important;
+            }
+            .carousel-manual-mode .bird-card {
+                scroll-snap-align: start !important;
             }
             .carousel-manual-mode .bird-carousel-viewport::-webkit-scrollbar {
                 height: 8px;

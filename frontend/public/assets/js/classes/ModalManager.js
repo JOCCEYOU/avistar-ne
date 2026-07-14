@@ -230,9 +230,15 @@ export class ModalManager {
     }
 
     showMessage(title, message, type = 'success') {
-        const isError = type === 'error';
-        const icon = isError ? '❌' : '✅';
-        const color = isError ? '#ef4444' : '#10b981';
+        let icon = '✅';
+        let color = '#10b981';
+        if (type === 'error') {
+            icon = '❌';
+            color = '#ef4444';
+        } else if (type === 'warning') {
+            icon = '❓';
+            color = '#f59e0b';
+        }
         const content = `
             <button class="modal-close" id="closeModalBtn" style="position:absolute; top:10px; right:15px; font-size:1.5rem; background:transparent; border:none; color:#cbd5e1; cursor:pointer; z-index: 10;">&times;</button>
             <div class="modal-body text-center py-4" style="padding: 2.5rem 2rem;">
