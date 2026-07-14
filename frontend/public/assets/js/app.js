@@ -2567,7 +2567,7 @@ window.showBirdOnMap = function (birdName) {
 
                         const marker = L.marker(point, { icon: habitatIcon }).addTo(habitatGroup);
                         marker.bindPopup(`
-                                <div style="text-align:center; min-width: 150px;">
+                                <div style="text-align:center; min-width: 150px; cursor: pointer;" onclick="window.mapManager.map.closePopup()">
                                     <div style="width: 100%; height: 110px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                         <img src="${bird.images[0]}" style="width:100%; height:100%; object-fit:cover; object-position:center;">
                                     </div>
@@ -2661,13 +2661,13 @@ window.applyMapFilters = function () {
 
             const marker = L.marker(bird.coords, { icon: customIcon }).addTo(window.mapManager.map);
             marker.bindPopup(`
-                    <div style="text-align:center; min-width: 140px;">
+                    <div style="text-align:center; min-width: 140px; cursor: pointer;" onclick="window.mapManager.map.closePopup()">
                         <div style="width: 100%; height: 110px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                             <img src="${bird.images[0]}" style="width:100%; height:100%; object-fit:contain; object-position:center;">
                         </div>
                         <strong style="color: var(--primary-color); font-size: 1.1rem; display:block; margin-bottom:2px;">${bird.name}</strong>
                         <small style="color: #64748b; display:block; margin-bottom:8px;">Hábitat sugerido</small>
-                        <button class="btn btn-primary" style="width: 100%; padding: 4px; font-size: 0.85rem;" onclick="window.modalManager.openBirdDetails(window.nativeBirdsData.find(b=>b.name==='${bird.name}'))">Ver Especie</button>
+                        <button class="btn btn-primary" style="width: 100%; padding: 4px; font-size: 0.85rem;" onclick="event.stopPropagation(); window.modalManager.openBirdDetails(window.nativeBirdsData.find(b=>b.name==='${bird.name}'))">Ver Especie</button>
                     </div>
                 `);
             window.mapManager.markers.push(marker);

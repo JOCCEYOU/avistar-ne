@@ -409,9 +409,10 @@ export class MapManager {
     clearMarkers() {
         if (this.markerClusterGroup) {
             this.markerClusterGroup.clearLayers();
-        } else {
-            this.markers.forEach(m => this.map.removeLayer(m));
         }
+        this.markers.forEach(m => {
+            if (m && m.remove) m.remove();
+        });
         this.markers = [];
         if (this.heatLayer) this.heatLayer.setLatLngs([]);
         this._clearBirdHeatLayers();
